@@ -1,0 +1,68 @@
+name: Scrape and Deploy
+on:
+  schedule:
+    - cron: '0 15 * * *'
+    - cron: '0 20 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  scrape-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    timeout-minutes: 150
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Tesseract OCR
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+
+      - name: Install dependencies
+        run: pip install requests selenium pytesseract pillow
+
+      - name: Run scraper
+        id: scrape
+        run: python scraper/fetch.py
+
+      - name: Purge past-auction leads
+        run: python scraper/purge_past_auctions.py
+
+      - name: Commit records
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add dashboard/records.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: update leads $(date -u +'%Y-%m-%d %H:%M UTC')"
+          for i in 1 2 3 4 5; do
+            git push origin main && echo "Push succeeded" && break
+            sleep $((RANDOM % 10 + 2))
+            git fetch origin main
+            git rebase -X ours origin/main || git rebase --abort
+            echo "Attempt $i failed, retrying..."
+          done
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard/
+
+      - uses: actions/deploy-pages@v4
