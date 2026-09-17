@@ -61,7 +61,23 @@ SEARCH_END   = (TODAY_CT + timedelta(days=220)).strftime("%Y%m%d")
 
 PAGE_TIMEOUT = 120
 MAX_PAGES    = 60          # 60*50 = 3000 rows -- comfortably above the current ~2,501 total
-OCR_LIMIT    = 60          # per-run cap on new docs OCR'd -- backlog carries over via known_docs
+OCR_LIMIT    = 30          # per-run cap on new docs OCR'd -- backlog carries over via known_docs.
+                            # Each OCR fetch reloads a full results page to reach a clickable row
+                            # (see ocr_doc below), so this is deliberately conservative -- 2026-09-17
+                            # test run's rapid page loads got a real "request timed out" from the
+                            # county's own site under load; don't hammer it harder than this.
+
+SEARCH_URL = (
+    f"{PUBLICSEARCH_BASE}/results"
+    f"?department=FC"
+    f"&instrumentDateRange={SEARCH_START}%2C{SEARCH_END}"
+    f"&keywordSearch=false"
+    f"&limit=50"
+    f"&sort=desc"
+    f"&sortBy=recordedDate"
+    f"&sortDir=desc"
+    f"&searchType=advancedSearch"
+)
 
 
 def get_driver():
@@ -128,18 +144,6 @@ def scrape_search_results(driver):
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
 
-    search_url = (
-        f"{PUBLICSEARCH_BASE}/results"
-        f"?department=FC"
-        f"&instrumentDateRange={SEARCH_START}%2C{SEARCH_END}"
-        f"&keywordSearch=false"
-        f"&limit=50"
-        f"&sort=desc"
-        f"&sortBy=recordedDate"
-        f"&sortDir=desc"
-        f"&searchType=advancedSearch"
-    )
-
     future_rows = []
     seen_docs = set()
     offset = 0
@@ -150,7 +154,7 @@ def scrape_search_results(driver):
         if page + 1 > MAX_PAGES:
             log.warning(f"Hit MAX_PAGES={MAX_PAGES} -- stopping, rest deferred to next run")
             break
-        url = f"{search_url}&offset={offset}"
+        url = f"{SEARCH_URL}&offset={offset}"
         log.info(f"Page {page + 1} (offset={offset})")
 
         loaded = False
@@ -198,8 +202,6 @@ def scrape_search_results(driver):
                         const el = row.querySelector('td.' + c);
                         out[c] = el ? el.innerText : '';
                     }
-                    const a = row.querySelector('a');
-                    out['href'] = a ? a.getAttribute('href') : '';
                     return out;
                     """,
                     row,
@@ -209,7 +211,6 @@ def scrape_search_results(driver):
                 sale_date = (data.get("col-5") or "").strip()
                 doc_number = (data.get("col-6") or "").strip()
                 city = (data.get("col-8") or "").strip()
-                href = (data.get("href") or "").strip()
 
                 if not doc_number or doc_number in seen_docs:
                     continue
@@ -220,12 +221,21 @@ def scrape_search_results(driver):
                     continue  # past auction -- discard, per explicit instruction
 
                 seen_docs.add(doc_number)
+                # 2026-09-17 fix: this SPA doesn't expose a real <a href> on
+                # each row (confirmed live -- querySelector('a') either
+                # found nothing or a non-navigable link, so every OCR
+                # fetch silently short-circuited on a falsy href and 0/50
+                # docs got real address/owner data). Rows navigate via a
+                # JS click handler instead. Store this row's page offset
+                # so ocr_doc() can reload the exact same results page later
+                # and click the real row by doc-number text match, instead
+                # of trying to read a URL that doesn't reliably exist.
                 future_rows.append({
                     "doc_number": doc_number,
                     "recorded_date": recorded_date,
                     "sale_date": sale_date,
                     "city": city,
-                    "href": href,
+                    "offset": offset,
                 })
                 page_new += 1
             except Exception as e:
@@ -254,18 +264,64 @@ GRANTOR_RE = re.compile(
 )
 
 
-def ocr_doc(driver, href):
+def ocr_doc(driver, offset, doc_number):
     """
-    Navigate to the doc detail page, grab page 1's signed image URL, OCR it.
-    Returns (address, owner) -- either may be "" if the template didn't
-    match or OCR came back too noisy to parse.
+    Reload the results page this doc_number was found on, click that exact
+    row (by matching its col-6 text -- see the fix note in
+    scrape_search_results for why this doesn't just navigate a stored
+    href), then grab page 1's signed image URL and OCR it. Returns
+    (address, owner) -- either may be "" if the template didn't match or
+    OCR came back too noisy to parse.
     """
     from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
 
     try:
         driver.set_page_load_timeout(PAGE_TIMEOUT)
-        driver.get(f"{PUBLICSEARCH_BASE}{href}")
-        time.sleep(3)
+        driver.get(f"{SEARCH_URL}&offset={offset}")
+        WebDriverWait(driver, PAGE_TIMEOUT).until(
+            lambda d: d.find_elements(By.CSS_SELECTOR, "table tbody tr")
+        )
+        time.sleep(1.5)
+
+        target_cell = None
+        for cell in driver.find_elements(By.CSS_SELECTOR, "td.col-6"):
+            if cell.text.strip() == doc_number:
+                target_cell = cell
+                break
+        if not target_cell:
+            log.debug(f"  Could not find row for {doc_number} at offset {offset} -- site may have reordered")
+            return "", ""
+        row = target_cell.find_element(By.XPATH, "..")
+
+        # Not certain which element actually carries the SPA's click
+        # handler -- try row, then cell, then any link inside the row,
+        # each with a short (not PAGE_TIMEOUT-length) wait so a wrong
+        # guess fails fast instead of burning minutes per doc across a
+        # 30-doc run.
+        navigated = False
+        for clickable in (row, target_cell):
+            try:
+                clickable.click()
+                WebDriverWait(driver, 15).until(lambda d: "/results" not in d.current_url)
+                navigated = True
+                break
+            except Exception:
+                continue
+        if not navigated:
+            links = row.find_elements(By.TAG_NAME, "a")
+            if links:
+                try:
+                    links[0].click()
+                    WebDriverWait(driver, 15).until(lambda d: "/results" not in d.current_url)
+                    navigated = True
+                except Exception:
+                    pass
+        if not navigated:
+            log.debug(f"  Click didn't navigate for {doc_number}")
+            return "", ""
+        time.sleep(2)
+
         img = None
         for _ in range(6):
             imgs = driver.find_elements(By.CSS_SELECTOR, "img[src*='/files/documents/']")
@@ -301,7 +357,7 @@ def ocr_doc(driver, href):
         owner = grantor_match.group(1).strip().rstrip(".") if grantor_match else ""
         return address, owner
     except Exception as e:
-        log.debug(f"  OCR error for {href}: {e}")
+        log.debug(f"  OCR error for {doc_number}: {e}")
         return "", ""
 
 
@@ -382,12 +438,16 @@ def main():
         log.info(f"{len(new_rows)} are new (not already in records.json)")
 
         new_records = []
+        ocr_hits = 0
         for i, row in enumerate(new_rows[:OCR_LIMIT]):
             log.info(f"[{i + 1}/{min(len(new_rows), OCR_LIMIT)}] OCR doc {row['doc_number']} (sale {row['sale_date']})")
-            address, owner = ocr_doc(driver, row["href"]) if row["href"] else ("", "")
+            address, owner = ocr_doc(driver, row["offset"], row["doc_number"])
+            if address or owner:
+                ocr_hits += 1
             rec = build_record(row, address, owner)
             new_records.append(rec)
-            time.sleep(1)
+            time.sleep(2)
+        log.info(f"OCR: {ocr_hits}/{len(new_records)} docs yielded at least an address or owner")
     finally:
         driver.quit()
 
