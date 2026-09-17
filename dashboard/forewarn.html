@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ForeWarn Search List — Dallas Leads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2330;
+    --border2: #252b3a;
+    --text: #e8ecf0;
+    --muted: #5a6380;
+    --dim: #3a4160;
+    --accent: #00d4aa;
+    --accent2: #0099ff;
+    --warn: #ff6b35;
+    --tax: #f5a623;
+    --nof: #4a9eff;
+    --absentee: #ff4757;
+    --new: #7bed9f;
+    --dispo-new: #3a4160;
+    --dispo-contacted: #1a3a5c;
+    --dispo-responded: #1a4a2e;
+    --dispo-deal: #0d3d2a;
+    --dispo-dead: #3d1a1a;
+    --skip: #2a2a3a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,12,16,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 60px;
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo span { color: var(--text); }
+
+  .budget-display {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+  }
+
+  .budget-item {
+    text-align: center;
+    min-width: 48px;
+  }
+  .budget-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .budget-num.used { color: var(--warn); }
+  .budget-num.total { color: var(--muted); }
+  .budget-num.left { color: var(--accent); }
+  .budget-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .budget-sep { color: var(--border2); font-size: 20px; }
+
+  .reset-info {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  .btn {
+    padding: 7px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--border); }
+  .btn.danger { border-color: var(--warn); color: var(--warn); }
+  .btn.danger:hover { background: rgba(255,107,53,0.1); }
+  .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { background: #00efc0; }
+  .btn.accent2 { background: var(--accent2); color: #fff; border-color: var(--accent2); font-weight: 600; }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    gap: 20px;
+    padding: 10px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  .main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 24px;
+  }
+
+  .section-header {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── FILTERS ── */
+  .filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-btn {
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #000; font-weight: 600; }
+  .filter-count { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+  /* ── LEAD CARD ── */
+  .lead-card {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s, opacity 0.3s;
+    position: relative;
+  }
+  .lead-card:hover { border-color: var(--border2); }
+  .lead-card.searched { opacity: 0.55; border-color: var(--border); }
+  .lead-card.skipped { opacity: 0.35; }
+  .lead-card.dispo-contacted { border-left: 3px solid var(--accent2); }
+  .lead-card.dispo-responded { border-left: 3px solid var(--accent); }
+  .lead-card.dispo-deal { border-left: 3px solid #7bed9f; background: rgba(123,237,159,0.04); }
+  .lead-card.dispo-dead { border-left: 3px solid var(--dim); opacity: 0.3; }
+
+  .lead-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .lead-body {
+    padding: 12px 16px;
+    min-width: 0;
+  }
+
+  .lead-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .lead-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge-absentee { background: rgba(255,71,87,0.15); color: var(--absentee); border: 1px solid rgba(255,71,87,0.3); }
+  .badge-tax { background: rgba(245,166,35,0.15); color: var(--tax); border: 1px solid rgba(245,166,35,0.3); }
+  .badge-nof { background: rgba(74,158,255,0.12); color: var(--nof); border: 1px solid rgba(74,158,255,0.25); }
+  .badge-new { background: rgba(123,237,159,0.12); color: var(--new); border: 1px solid rgba(123,237,159,0.25); }
+  .badge-score { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); font-family: 'Space Mono', monospace; }
+  .badge-score.high { color: var(--accent); border-color: rgba(0,212,170,0.3); }
+
+  .lead-address {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .lead-search-info {
+    display: flex;
+    gap: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+  .search-field { display: flex; gap: 6px; }
+  .search-label { color: var(--dim); }
+  .search-val { color: var(--text); font-weight: 500; }
+
+  .phone-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* ── LEAD ACTIONS ── */
+  .lead-actions {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 200px;
+    border-left: 1px solid var(--border);
+  }
+
+  .phone-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 7px 10px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .phone-input:focus { border-color: var(--accent); }
+  .phone-input::placeholder { color: var(--dim); font-family: 'DM Sans', sans-serif; font-size: 11px; }
+
+  .action-row {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .btn-save {
+    flex: 1;
+    padding: 7px 10px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-save:hover { background: #00efc0; }
+  .btn-save:disabled { background: var(--dim); color: var(--muted); cursor: not-allowed; }
+
+  .btn-skip {
+    padding: 7px 10px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-skip:hover { border-color: var(--dim); color: var(--text); }
+
+  /* ── DISPO SELECTOR ── */
+  .dispo-row {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+  }
+  .dispo-btn {
+    flex: 1;
+    padding: 4px 4px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--dim);
+    font-size: 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .dispo-btn:hover { border-color: var(--border2); color: var(--muted); }
+  .dispo-btn.active-new { background: rgba(58,65,96,0.4); border-color: var(--dim); color: var(--muted); }
+  .dispo-btn.active-contacted { background: rgba(0,153,255,0.15); border-color: var(--accent2); color: var(--accent2); }
+  .dispo-btn.active-responded { background: rgba(0,212,170,0.12); border-color: var(--accent); color: var(--accent); }
+  .dispo-btn.active-deal { background: rgba(123,237,159,0.15); border-color: var(--new); color: var(--new); }
+  .dispo-btn.active-dead { background: rgba(58,26,26,0.4); border-color: var(--dim); color: var(--dim); }
+
+  /* ── STATUS BADGE ON CARD ── */
+  .searched-badge {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .searched-badge::before { content: '✓'; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--accent);
+    z-index: 9999;
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    max-width: 320px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast.error { border-color: var(--warn); color: var(--warn); }
+
+  /* ── LOADING ── */
+  .loading {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+  .loading-dot {
+    display: inline-block;
+    animation: blink 1.2s infinite;
+  }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+
+  /* ── EMPTY ── */
+  .empty { text-align: center; padding: 48px; color: var(--muted); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex;
+    gap: 24px;
+    padding: 12px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .stat { display: flex; gap: 6px; align-items: center; }
+  .stat-num { font-family: 'Space Mono', monospace; color: var(--text); font-weight: 700; }
+
+  /* ── GHL STATUS ── */
+  .ghl-status {
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+  }
+  .ghl-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dim); }
+  .ghl-dot.ok { background: var(--accent); }
+  .ghl-dot.err { background: var(--warn); }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 28px;
+    width: 400px;
+    max-width: 90vw;
+  }
+  .modal h3 { font-size: 16px; margin-bottom: 16px; color: var(--text); }
+  .modal label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; margin-top: 12px; }
+  .modal input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+  }
+  .modal input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+
+  @media (max-width: 768px) {
+    .lead-card { grid-template-columns: 28px 1fr; }
+    .lead-actions { grid-column: 1/-1; border-left: none; border-top: 1px solid var(--border); flex-direction: row; flex-wrap: wrap; }
+    .header { gap: 12px; padding: 0 12px; }
+    .budget-display { padding: 6px 10px; gap: 12px; }
+    .budget-num { font-size: 18px; }
+    .main { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">📞 <span>ForeWarn</span> Search List</div>
+
+  <div class="budget-display">
+    <div class="budget-item">
+      <div class="budget-num used" id="usedCount">0</div>
+      <div class="budget-label">Used</div>
+    </div>
+    <div class="budget-sep">|</div>
+    <div class="budget-item">
+      <div class="budget-num total">100</div>
+      <div class="budget-label">Budget</div>
+    </div>
+    <div class="budget-sep">|</div>
+    <div class="budget-item">
+      <div class="budget-num left" id="leftCount">100</div>
+      <div class="budget-label">Left</div>
+    </div>
+  </div>
+
+  <div class="reset-info" id="resetInfo">Resets Sunday midnight</div>
+
+  <div class="header-actions">
+    <button class="btn danger" onclick="confirmReset()">Reset Week</button>
+    <button class="btn" onclick="openSettings()">⚙ Settings</button>
+    <a href="leads.html" class="btn">← Dashboard</a>
+  </div>
+</header>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:var(--absentee)"></div>Absentee — highest priority</div>
+  <div class="legend-item"><div class="dot" style="background:var(--tax)"></div>Tax Foreclosure — urgent</div>
+  <div class="legend-item"><div class="dot" style="background:var(--nof)"></div>NOF — Notice of Filing</div>
+  <div class="legend-item"><div class="dot" style="background:var(--new)"></div>New This Run</div>
+  <div class="legend-item" style="margin-left:auto;">
+    <div class="ghl-status"><div class="ghl-dot" id="ghlDot"></div><span id="ghlStatusText">GHL not configured</span></div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stat">Total leads: <span class="stat-num" id="statTotal">—</span></div>
+  <div class="stat">Showing: <span class="stat-num" id="statShowing">—</span></div>
+  <div class="stat">Searched: <span class="stat-num" id="statSearched">—</span></div>
+  <div class="stat">Contacted: <span class="stat-num" id="statContacted">—</span></div>
+  <div class="stat">🔥 Deals: <span class="stat-num" id="statDeals">—</span></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="section-header" id="sectionHeader">TOP 100 PRIORITY LEADS</div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" data-filter="unsearched" onclick="setFilter('unsearched',this)">Unsearched</button>
+    <button class="filter-btn" data-filter="searched" onclick="setFilter('searched',this)">Searched</button>
+    <button class="filter-btn" data-filter="absentee" onclick="setFilter('absentee',this)">Absentee</button>
+    <button class="filter-btn" data-filter="tax" onclick="setFilter('tax',this)">Tax Fore</button>
+    <button class="filter-btn" data-filter="deal" onclick="setFilter('deal',this)">🔥 Deals</button>
+    <button class="filter-btn" data-filter="dead" onclick="setFilter('dead',this)">Dead</button>
+    <span class="filter-count" id="filterCount"></span>
+  </div>
+
+  <div id="leadsList">
+    <div class="loading">Loading leads<span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3>⚙ Settings</h3>
+    <label>GHL API Key</label>
+    <input type="password" id="ghlApiKey" placeholder="eyJhbGci..." />
+    <label>GHL Location ID</label>
+    <input type="text" id="ghlLocationId" placeholder="UAOJlgeerLu3GChP9jDJ" />
+    <label>Records JSON URL</label>
+    <input type="text" id="recordsUrl" placeholder="https://e4property.github.io/dallas-leads/records.json" />
+    <div class="modal-actions">
+      <button class="btn" onclick="closeSettings()">Cancel</button>
+      <button class="btn primary" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONFIG & STATE
+// ═══════════════════════════════════════════════════════
+const STORAGE_KEY = 'fw_state_v3';
+const RECORDS_URL_DEFAULT = 'https://e4property.github.io/dallas-leads/records.json';
+
+let state = {
+  ghlApiKey: '',
+  ghlLocationId: 'UAOJlgeerLu3GChP9jDJ',
+  recordsUrl: RECORDS_URL_DEFAULT,
+  weekStart: getSundayTimestamp(),
+  used: 0,
+  leads: {} // doc_number → { phone, dispo, skipped, searchedAt }
+};
+
+let allLeads = [];
+let priorityLeads = [];
+let currentFilter = 'all';
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  loadState();
+  checkWeekReset();
+  updateBudget();
+  updateResetInfo();
+  loadLeads();
+  updateGhlStatus();
+}
+
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+  } catch(e) {}
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function getSundayTimestamp() {
+  const now = new Date();
+  const day = now.getDay();
+  const diff = now.getDate() - day;
+  const sunday = new Date(now.setDate(diff));
+  sunday.setHours(0,0,0,0);
+  return sunday.getTime();
+}
+
+function checkWeekReset() {
+  const currentSunday = getSundayTimestamp();
+  if (state.weekStart < currentSunday) {
+    state.weekStart = currentSunday;
+    state.used = 0;
+    saveState();
+    showToast('Week reset — 100 searches available!');
+  }
+}
+
+function updateResetInfo() {
+  const now = new Date();
+  const nextSunday = new Date(state.weekStart + 7 * 24 * 60 * 60 * 1000);
+  const diff = nextSunday - now;
+  const days = Math.floor(diff / (1000*60*60*24));
+  const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+  document.getElementById('resetInfo').textContent =
+    `Resets in ${days}d ${hours}h (Sunday midnight)`;
+}
+
+function updateBudget() {
+  const used = state.used;
+  const left = Math.max(0, 100 - used);
+  document.getElementById('usedCount').textContent = used;
+  document.getElementById('leftCount').textContent = left;
+  document.getElementById('progressFill').style.width = `${used}%`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  LOAD LEADS
+// ═══════════════════════════════════════════════════════
+async function loadLeads() {
+  try {
+    const url = state.recordsUrl || RECORDS_URL_DEFAULT;
+    const resp = await fetch(url + '?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    allLeads = await resp.json();
+    priorityLeads = buildPriorityList(allLeads);
+    document.getElementById('statTotal').textContent = allLeads.length;
+    renderLeads();
+  } catch(e) {
+    document.getElementById('leadsList').innerHTML =
+      `<div class="empty">⚠ Could not load records.json<br><small style="color:var(--dim);margin-top:8px;display:block">${e.message}<br>Check Settings → Records URL</small></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  PRIORITY SCORING
+// ═══════════════════════════════════════════════════════
+function isIndividual(owner) {
+  if (!owner || owner.trim() === '') return false;
+  const skip = ['LLC','INC','CORP','TRUST','ASSOCIATION','CONDOMINIUM',
+                 'PROPERTIES','INVESTMENTS','GROUP','HOLDINGS','PARTNERS',
+                 'ESTATES','ASSETS','CAPITAL','FUND','REALTY','REAL ESTATE'];
+  const up = owner.toUpperCase();
+  return !skip.some(s => up.includes(s));
+}
+
+function buildPriorityList(records) {
+  const seen = new Set();
+  const cleaned = records.filter(r => {
+    if (!isIndividual(r.owner)) return false;
+    if (r.flags && r.flags.includes('NO OWNER')) return false;
+    const key = r.address + '|' + r.owner;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  cleaned.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const aAbs = a.absentee ? 1 : 0, bAbs = b.absentee ? 1 : 0;
+    if (bAbs !== aAbs) return bAbs - aAbs;
+    const aTax = (a.type === 'TAX') ? 1 : 0, bTax = (b.type === 'TAX') ? 1 : 0;
+    if (bTax !== aTax) return bTax - aTax;
+    return (b.run_ts || '').localeCompare(a.run_ts || '');
+  });
+
+  return cleaned.slice(0, 100);
+}
+
+// ═══════════════════════════════════════════════════════
+//  NAME PARSING — FIX: first name only (no middle names)
+// ═══════════════════════════════════════════════════════
+function parseName(owner) {
+  if (!owner) return { first: '', last: '' };
+  let clean = owner.replace(/\s*&\s*$/, '').trim();
+  if (clean.includes('&')) clean = clean.split('&')[0].trim();
+  clean = clean.replace(/\b(JR|SR|II|III|IV|EST OF|C\/T|ETAL)\b/gi, '').trim();
+  const parts = clean.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return { first: '', last: '' };
+  if (parts.length === 1) return { first: parts[0], last: '' };
+  const last = parts[0];
+  const first = parts[1] || ''; // ← FIXED: first word only, no middle names
+  return { first: toTitle(first), last: toTitle(last) };
+}
+
+function toTitle(s) {
+  return s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function getSearchCity(record) {
+  if (record.absentee && record.mail_addr) {
+    const parts = record.mail_addr.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      for (let i = parts.length - 1; i >= 0; i--) {
+        if (/^[A-Z]+$/.test(parts[i]) && parts[i].length > 2) return toTitle(parts[i]);
+      }
+    }
+  }
+  return toTitle(record.city || '');
+}
+
+function getSearchZip(record) {
+  if (record.absentee && record.mail_addr) {
+    const parts = record.mail_addr.trim().split(/\s+/);
+    const last = parts[parts.length - 1];
+    if (/^\d{5}$/.test(last)) return last;
+  }
+  return record.zip || '';
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function getLeadState(doc) {
+  return state.leads[doc] || { phone: '', dispo: 'new', skipped: false };
+}
+
+function getFilteredLeads() {
+  return priorityLeads.filter(lead => {
+    const ls = getLeadState(lead.doc_number);
+    if (currentFilter === 'unsearched') return !ls.phone && !ls.skipped;
+    if (currentFilter === 'searched') return !!ls.phone;
+    if (currentFilter === 'absentee') return lead.absentee;
+    if (currentFilter === 'tax') return lead.type === 'TAX';
+    if (currentFilter === 'deal') return ls.dispo === 'deal';
+    if (currentFilter === 'dead') return ls.dispo === 'dead';
+    return true;
+  });
+}
+
+function renderLeads() {
+  const filtered = getFilteredLeads();
+  const searched = priorityLeads.filter(l => !!getLeadState(l.doc_number).phone).length;
+  const contacted = priorityLeads.filter(l => getLeadState(l.doc_number).dispo === 'contacted').length;
+  const deals = priorityLeads.filter(l => getLeadState(l.doc_number).dispo === 'deal').length;
+
+  document.getElementById('statShowing').textContent = filtered.length;
+  document.getElementById('statSearched').textContent = searched;
+  document.getElementById('statContacted').textContent = contacted;
+  document.getElementById('statDeals').textContent = deals;
+
+  const sLeft = Math.max(0, 100 - state.used);
+  document.getElementById('sectionHeader').textContent =
+    `TOP ${priorityLeads.length} PRIORITY LEADS — ${sLeft} SEARCHES REMAINING THIS WEEK`;
+  document.getElementById('filterCount').textContent = `${filtered.length} leads`;
+
+  if (filtered.length === 0) {
+    document.getElementById('leadsList').innerHTML = '<div class="empty">No leads match this filter.</div>';
+    return;
+  }
+
+  const html = filtered.map((lead, idx) => renderCard(lead, idx + 1)).join('');
+  document.getElementById('leadsList').innerHTML = html;
+}
+
+function renderCard(lead, idx) {
+  const ls = getLeadState(lead.doc_number);
+  const { first, last } = parseName(lead.owner);
+  const city = getSearchCity(lead);
+  const zip = getSearchZip(lead);
+  const doc = lead.doc_number;
+
+  const isSearched = !!ls.phone;
+  const isSkipped = ls.skipped && !isSearched;
+  const dispo = ls.dispo || 'new';
+
+  const badges = [];
+  if (lead.absentee) badges.push(`<span class="badge badge-absentee">Absentee</span>`);
+  if (lead.type === 'TAX') badges.push(`<span class="badge badge-tax">Tax Fore</span>`);
+  else badges.push(`<span class="badge badge-nof">NOF</span>`);
+  if (lead.is_new) badges.push(`<span class="badge badge-new">New</span>`);
+  const scoreClass = lead.score >= 8 ? 'high' : '';
+  badges.push(`<span class="badge badge-score ${scoreClass}">Score ${lead.score}</span>`);
+
+  let cardClass = 'lead-card';
+  if (isSearched) cardClass += ' searched';
+  if (isSkipped) cardClass += ' skipped';
+  if (dispo !== 'new') cardClass += ` dispo-${dispo}`;
+
+  let actionHtml;
+  if (isSearched) {
+    actionHtml = `
+      <div class="phone-display">📞 ${ls.phone}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px;">Searched ${ls.searchedAt ? new Date(ls.searchedAt).toLocaleDateString() : ''}</div>
+      ${renderDispoButtons(doc, dispo)}
+      <button class="btn-skip" style="width:100%;font-size:11px;margin-top:2px;" onclick="clearSearch('${doc}')">✕ Clear</button>
+    `;
+  } else {
+    actionHtml = `
+      <input class="phone-input" id="phone_${doc}" type="tel" placeholder="Enter phone from ForeWarn"
+        onkeydown="if(event.key==='Enter')savePhone('${doc}')" />
+      <div class="action-row">
+        <button class="btn-save" onclick="savePhone('${doc}')">✓ Save &amp; Mark Searched</button>
+        <button class="btn-skip" onclick="skipLead('${doc}')">Skip</button>
+      </div>
+      ${renderDispoButtons(doc, dispo)}
+    `;
+  }
+
+  return `
+    <div class="lead-card ${cardClass.replace('lead-card ','')}" id="card_${doc}" style="${getCardBg(dispo)}">
+      <div class="lead-num">${idx}</div>
+      <div class="lead-body">
+        <div class="lead-top">
+          <div class="lead-name">${lead.owner}</div>
+          ${badges.join('')}
+          ${isSearched ? '<span class="searched-badge">Searched</span>' : ''}
+        </div>
+        <div class="lead-address">${lead.address}, ${lead.city} TX ${lead.zip} · ${lead.school_dist || ''}</div>
+        <div class="lead-search-info">
+          <div class="search-field"><span class="search-label">First:</span><span class="search-val">${first}</span></div>
+          <div class="search-field"><span class="search-label">Last:</span><span class="search-val">${last}</span></div>
+          <div class="search-field"><span class="search-label">City:</span><span class="search-val">${city}</span></div>
+          <div class="search-field"><span class="search-label">ZIP:</span><span class="search-val">${zip}</span></div>
+        </div>
+      </div>
+      <div class="lead-actions">
+        ${actionHtml}
+      </div>
+    </div>`;
+}
+
+function getCardBg(dispo) {
+  if (dispo === 'deal') return 'background:rgba(123,237,159,0.03)';
+  if (dispo === 'dead') return 'background:rgba(50,20,20,0.3)';
+  return '';
+}
+
+function renderDispoButtons(doc, current) {
+  const stages = ['new','contacted','responded','deal','dead'];
+  const labels = { new:'New', contacted:'Contacted', responded:'Responded', deal:'🔥 Deal', dead:'Dead' };
+  const btns = stages.map(s =>
+    `<button class="dispo-btn ${current===s?'active-'+s:''}" onclick="setDispo('${doc}','${s}')">${labels[s]}</button>`
+  ).join('');
+  return `<div class="dispo-row">${btns}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════════════
+async function savePhone(doc) {
+  if (state.used >= 100) {
+    showToast('⚠ Weekly budget exhausted — resets Sunday midnight', true);
+    return;
+  }
+
+  const input = document.getElementById('phone_' + doc);
+  const phone = input ? input.value.trim() : '';
+  if (!phone) {
+    showToast('Enter a phone number first', true);
+    return;
+  }
+
+  const lead = priorityLeads.find(l => l.doc_number === doc);
+  if (!lead) return;
+
+  if (!state.leads[doc]) state.leads[doc] = {};
+  state.leads[doc].phone = phone;
+  state.leads[doc].searchedAt = Date.now();
+  state.leads[doc].dispo = state.leads[doc].dispo || 'new';
+  state.leads[doc].skipped = false;
+  state.used++;
+  saveState();
+  updateBudget();
+
+  if (state.ghlApiKey && state.ghlLocationId) {
+    await pushToGHL(lead, phone);
+  }
+
+  renderLeads();
+  showToast(`✓ ${lead.owner} saved — ${Math.max(0, 100 - state.used)} searches left`);
+}
+
+function skipLead(doc) {
+  if (!state.leads[doc]) state.leads[doc] = {};
+  state.leads[doc].skipped = !state.leads[doc].skipped;
+  saveState();
+  renderLeads();
+}
+
+function clearSearch(doc) {
+  if (!confirm('Clear this search? It will NOT refund your weekly count.')) return;
+  if (state.leads[doc]) {
+    state.leads[doc].phone = '';
+    state.leads[doc].searchedAt = null;
+    saveState();
+    renderLeads();
+  }
+}
+
+function setDispo(doc, dispo) {
+  if (!state.leads[doc]) state.leads[doc] = {};
+  state.leads[doc].dispo = dispo;
+  saveState();
+  if (state.ghlApiKey && state.leads[doc]?.ghlContactId) {
+    updateGHLDispo(state.leads[doc].ghlContactId, dispo);
+  }
+  renderLeads();
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeads();
+}
+
+// ═══════════════════════════════════════════════════════
+//  GHL INTEGRATION
+// ═══════════════════════════════════════════════════════
+async function pushToGHL(lead, phone) {
+  try {
+    const { first, last } = parseName(lead.owner);
+
+    const tags = ['dallas_lead', 'forewarn_searched', 'dallas-contacted'];
+    if (lead.absentee) tags.push('absentee');
+    if (lead.type === 'TAX') tags.push('tax_foreclosure');
+    if (lead.is_new) tags.push('new_lead');
+
+    const body = {
+      locationId: state.ghlLocationId,
+      firstName: first,
+      lastName: last,
+      phone: phone,
+      address1: lead.address,
+      city: lead.city,
+      state: 'TX',
+      postalCode: lead.zip,
+      tags,
+      customFields: [
+        { key: 'lead_score', field_value: String(lead.score) },
+        { key: 'lead_type', field_value: lead.type },
+        { key: 'doc_number', field_value: lead.doc_number },
+        { key: 'school_district', field_value: lead.school_dist || '' },
+        { key: 'date_filed', field_value: lead.date_filed || '' },
+      ]
+    };
+
+    const resp = await fetch('https://rest.gohighlevel.com/v1/contacts/', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + state.ghlApiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    const data = await resp.json();
+    if (data.contact?.id) {
+      state.leads[lead.doc_number].ghlContactId = data.contact.id;
+      saveState();
+      updateGhlStatus(true);
+    } else if (data.id) {
+      state.leads[lead.doc_number].ghlContactId = data.id;
+      saveState();
+      updateGhlStatus(true);
+    }
+  } catch(e) {
+    console.error('GHL error:', e);
+    updateGhlStatus(false, e.message);
+  }
+}
+
+async function updateGHLDispo(contactId, dispo) {
+  const tagMap = {
+    contacted: 'dispo_contacted',
+    responded: 'dispo_responded',
+    deal: 'dispo_deal',
+    dead: 'dispo_dead'
+  };
+  const tag = tagMap[dispo];
+  if (!tag) return;
+
+  try {
+    await fetch(`https://rest.gohighlevel.com/v1/contacts/${contactId}/tags/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + state.ghlApiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ tags: [tag] })
+    });
+  } catch(e) {}
+}
+
+function updateGhlStatus(success, msg) {
+  const dot = document.getElementById('ghlDot');
+  const txt = document.getElementById('ghlStatusText');
+  if (!state.ghlApiKey) {
+    dot.className = 'ghl-dot';
+    txt.textContent = 'GHL not configured';
+    return;
+  }
+  if (success === true) {
+    dot.className = 'ghl-dot ok';
+    txt.textContent = 'GHL connected';
+  } else if (success === false) {
+    dot.className = 'ghl-dot err';
+    txt.textContent = 'GHL error: ' + (msg || 'check key');
+  } else {
+    dot.className = 'ghl-dot ok';
+    txt.textContent = 'GHL configured';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════════════════
+function openSettings() {
+  document.getElementById('ghlApiKey').value = state.ghlApiKey || '';
+  document.getElementById('ghlLocationId').value = state.ghlLocationId || 'UAOJlgeerLu3GChP9jDJ';
+  document.getElementById('recordsUrl').value = state.recordsUrl || RECORDS_URL_DEFAULT;
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+function saveSettings() {
+  state.ghlApiKey = document.getElementById('ghlApiKey').value.trim();
+  state.ghlLocationId = document.getElementById('ghlLocationId').value.trim();
+  state.recordsUrl = document.getElementById('recordsUrl').value.trim() || RECORDS_URL_DEFAULT;
+  saveState();
+  closeSettings();
+  updateGhlStatus();
+  showToast('Settings saved');
+  loadLeads();
+}
+
+// ═══════════════════════════════════════════════════════
+//  RESET
+// ═══════════════════════════════════════════════════════
+function confirmReset() {
+  if (confirm('Reset weekly search count to 0? (Does not clear phone numbers or dispo)')) {
+    state.used = 0;
+    state.weekStart = getSundayTimestamp();
+    saveState();
+    updateBudget();
+    showToast('Week reset — 100 searches available!');
+    renderLeads();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3200);
+}
+
+// ═══════════════════════════════════════════════════════
+//  START
+// ═══════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
