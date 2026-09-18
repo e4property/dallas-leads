@@ -124,10 +124,21 @@ def parse_mdy(s):
 
 
 def load_known_docs():
+    """Returns (known_good_docs, prev_records). known_good_docs is doc
+    numbers that already have a real address or owner -- genuinely done,
+    skip forever. Records with neither (every doc from this scraper's whole
+    two-prior-attempt 0%-OCR history) are deliberately left OUT of that
+    set: confirmed live 2026-09-18 that treating "already has a row in
+    records.json" as "done" meant a fresh run found 0 new docs and never
+    retried a single one of the 79 already sitting there with blank OCR
+    data. Those get re-fetched (using the current run's fresh offset,
+    since offset isn't persisted) and, if this run's OCR succeeds, replace
+    the old blank record instead of duplicating it."""
     if RECORDS_PATH.exists():
         try:
             prev = json.loads(RECORDS_PATH.read_text(encoding="utf-8"))
-            return {r["doc_number"] for r in prev if r.get("doc_number")}, prev
+            known_good = {r["doc_number"] for r in prev if r.get("doc_number") and (r.get("address") or r.get("owner"))}
+            return known_good, prev
         except Exception as e:
             log.warning(f"Could not load existing records.json: {e}")
     return set(), []
@@ -428,7 +439,7 @@ def score_record(rec):
     return score
 
 
-def build_record(row, address, owner):
+def build_record(row, address, owner, is_new=True):
     sale_dt = parse_mdy(row["sale_date"])
     days_until = (sale_dt.date() - TODAY_CT.date()).days if sale_dt else None
     city, zip_code = parse_city_zip(address) if address else (row.get("city", ""), "")
@@ -444,14 +455,14 @@ def build_record(row, address, owner):
         "zip": zip_code,
         "absentee": False,
         "duplicate": False,
-        "is_new": True,
+        "is_new": is_new,
         "doc_number": row["doc_number"],
         "date_filed": row["recorded_date"],
         "date_recorded": row["recorded_date"],
         "sale_date": row["sale_date"],
         "days_until_sale": days_until,
         "run_ts": RUN_TIMESTAMP,
-        "flags": ["NEW", "HAS SALE DATE"] + (["NO ADDRESS - OCR MISS"] if not address else []) + (["NO OWNER - OCR MISS"] if not owner else []),
+        "flags": (["NEW"] if is_new else ["OCR RETRY"]) + ["HAS SALE DATE"] + (["NO ADDRESS - OCR MISS"] if not address else []) + (["NO OWNER - OCR MISS"] if not owner else []),
         "lender": "",
         "loan_amount": "",
         "loan_date": "",
@@ -475,16 +486,19 @@ def build_record(row, address, owner):
 
 
 def main():
-    known_docs, prev_records = load_known_docs()
-    log.info(f"Loaded {len(prev_records)} existing records ({len(known_docs)} known doc numbers)")
+    known_good_docs, prev_records = load_known_docs()
+    all_prev_doc_numbers = {r["doc_number"] for r in prev_records if r.get("doc_number")}
+    blank_doc_count = len(all_prev_doc_numbers) - len(known_good_docs)
+    log.info(f"Loaded {len(prev_records)} existing records ({len(known_good_docs)} with real OCR data, "
+             f"{blank_doc_count} blank and eligible for retry)")
 
     driver = get_driver()
     try:
         future_rows = scrape_search_results(driver)
         log.info(f"Found {len(future_rows)} total future-dated FORECLOSURE notices in window")
 
-        new_rows = [r for r in future_rows if r["doc_number"] not in known_docs]
-        log.info(f"{len(new_rows)} are new (not already in records.json)")
+        new_rows = [r for r in future_rows if r["doc_number"] not in known_good_docs]
+        log.info(f"{len(new_rows)} are new-or-retry (not already OCR'd successfully)")
 
         new_records = []
         ocr_hits = 0
@@ -495,7 +509,7 @@ def main():
             stage_counts[stage] = stage_counts.get(stage, 0) + 1
             if address or owner:
                 ocr_hits += 1
-            rec = build_record(row, address, owner)
+            rec = build_record(row, address, owner, is_new=(row["doc_number"] not in all_prev_doc_numbers))
             new_records.append(rec)
             time.sleep(2)
         log.info(f"OCR: {ocr_hits}/{len(new_records)} docs yielded at least an address or owner")
@@ -505,16 +519,22 @@ def main():
 
     # Drop any existing record whose sale date has since passed -- belt and
     # suspenders alongside purge_past_auctions.py, since this scraper's own
-    # job is specifically "future auctions only."
+    # job is specifically "future auctions only." Also drop any record this
+    # run just retried (whether or not the retry itself found an address)
+    # so it doesn't sit in records.json twice -- new_records already has
+    # this run's version of it.
+    retried_doc_numbers = {row["doc_number"] for row in new_rows[:OCR_LIMIT]}
     kept_prev = []
     for r in prev_records:
         sd = parse_mdy(r.get("sale_date", ""))
         if sd and sd.date() < TODAY_CT.date():
             continue
+        if r.get("doc_number") in retried_doc_numbers:
+            continue
         kept_prev.append(r)
     dropped = len(prev_records) - len(kept_prev)
     if dropped:
-        log.info(f"Dropped {dropped} existing record(s) whose sale date has passed")
+        log.info(f"Dropped {dropped} existing record(s) whose sale date has passed or was re-OCR'd this run")
 
     all_records = kept_prev + new_records
     RECORDS_PATH.parent.mkdir(parents=True, exist_ok=True)
