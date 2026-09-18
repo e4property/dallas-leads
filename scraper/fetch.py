@@ -64,7 +64,14 @@ SEARCH_END   = (TODAY_CT + timedelta(days=220)).strftime("%Y%m%d")
 
 PAGE_TIMEOUT = 120
 MAX_PAGES    = 60          # 60*50 = 3000 rows -- comfortably above the current ~2,501 total
-OCR_LIMIT    = 30          # per-run cap on new docs OCR'd -- backlog carries over via known_docs.
+OCR_LIMIT    = 6           # 2026-09-18: confirmed live the site rate-limits/blocks the runner's IP
+                            # after the very first doc-detail page load -- 29 of 30 docs in a full
+                            # run hit TimeoutException at the *next* page load, every single one,
+                            # right at PAGE_TIMEOUT. The extraction itself is fixed and confirmed
+                            # working (doc #1 came back clean in ~14s), this cap is purely about not
+                            # tripping the site's rate limiter. Backlog carries over run to run via
+                            # the retry-eligible logic in load_known_docs()/main(), and the workflow
+                            # runs twice daily, so a ~50-doc backlog clears in about a week either way.
                             # Each OCR fetch reloads a full results page to reach a clickable row
                             # (see ocr_doc below), so this is deliberately conservative -- 2026-09-17
                             # test run's rapid page loads got a real "request timed out" from the
@@ -548,7 +555,7 @@ def main():
                 ocr_hits += 1
             rec = build_record(row, address, owner, is_new=(row["doc_number"] not in all_prev_doc_numbers))
             new_records.append(rec)
-            time.sleep(2)
+            time.sleep(15)  # see OCR_LIMIT's comment -- extra spacing to avoid the rate limiter
         log.info(f"OCR: {ocr_hits}/{len(new_records)} docs yielded at least an address or owner")
         log.info(f"OCR stage breakdown (where the pipeline stopped for each doc): {stage_counts}")
     finally:
