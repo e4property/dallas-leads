@@ -9,12 +9,15 @@ county's own site (dallascounty.org/.../foreclosures.php): notices filed on
 or after 2/24/2026 live here; older ones are individual PDFs on that page,
 not handled by this scraper.
 
-Key difference from Bexar: this department does NOT expose owner name or a
-real street address as structured fields -- "Property Address" here is just
-the city (e.g. "DALLAS"). The real address and grantor/borrower name only
-exist inside the scanned document image itself, so this scraper downloads
-page 1 of each new qualifying notice and OCRs it (pytesseract) to pull
-"commonly known as <address>" and the Grantor(s) name out of the body text.
+The SEARCH RESULTS table itself only gives the city in col-8, not a real
+street address -- but (corrected 2026-09-18, see ocr_doc()'s own docstring
+for the full story) each row's DOC DETAIL page has its own SUMMARY panel
+with a real structured "Property Address" field, plus a "Parties" field
+that's usually but not always populated with owner name. This scraper
+clicks through to that detail page and reads those fields directly out of
+the DOM. OCR (pytesseract) is now only a fallback for the owner name
+specifically, used when "Parties" comes back empty and the scanned notice
+image is available to try instead.
 No Dallas CAD/owner-lookup integration yet (Bexar has one via Harris Govern;
 Dallas would need its own, separate project -- not built here).
 
@@ -61,7 +64,7 @@ SEARCH_END   = (TODAY_CT + timedelta(days=220)).strftime("%Y%m%d")
 
 PAGE_TIMEOUT = 120
 MAX_PAGES    = 60          # 60*50 = 3000 rows -- comfortably above the current ~2,501 total
-OCR_LIMIT    = 5           # TEMP diagnostic run 2026-09-18, restore to 30 after root cause confirmed
+OCR_LIMIT    = 30          # per-run cap on new docs OCR'd -- backlog carries over via known_docs.
                             # Each OCR fetch reloads a full results page to reach a clickable row
                             # (see ocr_doc below), so this is deliberately conservative -- 2026-09-17
                             # test run's rapid page loads got a real "request timed out" from the
@@ -262,14 +265,6 @@ def scrape_search_results(driver):
     return future_rows
 
 
-ADDRESS_RE = re.compile(
-    r"commonly known as[:\s]+([0-9][^\n,]*(?:,[^\n]*)?(?:TX|Texas)[^\n]*\d{5})",
-    re.IGNORECASE,
-)
-ADDRESS_FALLBACK_RE = re.compile(
-    r"Property Address:?\s*([0-9][^\n]{5,80})",
-    re.IGNORECASE,
-)
 GRANTOR_RE = re.compile(
     r"Grantor\(?s?\)?:?\s*([A-Z][A-Za-z .,&'\-]{3,80})",
 )
@@ -280,9 +275,23 @@ def ocr_doc(driver, offset, doc_number):
     Reload the results page this doc_number was found on, click that exact
     row (by matching its col-6 text -- see the fix note in
     scrape_search_results for why this doesn't just navigate a stored
-    href), then grab page 1's signed image URL and OCR it. Returns
-    (address, owner) -- either may be "" if the template didn't match or
-    OCR came back too noisy to parse.
+    href), then read the doc detail page. Returns (address, owner, stage).
+
+    2026-09-18 correction of this module's original assumption (see the
+    file docstring): the SEARCH RESULTS table's own col-8 really is just
+    the city, but the individual DOC DETAIL page a row's click leads to
+    has a real structured "Property Address" field in its own SUMMARY
+    panel (<h3>Property Address</h3> followed by a
+    .doc-preview-group__summary-group-label span) -- confirmed live
+    against a real doc, address came back clean with zero OCR involved.
+    This is why every previous attempt got 0%: the code was waiting on
+    and requiring an `img[src*='/files/documents/']` that either doesn't
+    exist on every doc or simply wasn't the right thing to wait for --
+    either way the real, reliable data was sitting in the DOM the whole
+    time. OCR is now only a fallback for the owner name specifically,
+    used when the page's own "Parties" section says "No parties found"
+    (also confirmed real and common -- not every notice's Parties data is
+    populated).
     """
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
@@ -353,67 +362,95 @@ def ocr_doc(driver, offset, doc_number):
         time.sleep(2)
         log.info(f"  [{doc_number}] navigated OK ({stage}) -> {driver.current_url}")
 
-        img = None
-        for attempt in range(6):
-            imgs = driver.find_elements(By.CSS_SELECTOR, "img[src*='/files/documents/']")
-            if imgs:
-                img = imgs[0]
+        # Wait for the SUMMARY panel's own structured fields to render,
+        # not for an image -- the panel is what actually has reliable
+        # data (see this function's docstring). Poll for either the
+        # "Property Address" h3 or "Parties" h3 to show up.
+        summary_ready = False
+        for attempt in range(8):
+            h3_texts = [h.text.strip() for h in driver.find_elements(By.TAG_NAME, "h3")]
+            if any(t in ("Property Address", "Parties") for t in h3_texts):
+                summary_ready = True
                 break
-            time.sleep(2)
-        if not img:
-            # dump what images/selectors ARE on the page, once, to see what
-            # the real viewer markup looks like if our selector is stale
-            all_imgs = driver.find_elements(By.TAG_NAME, "img")
-            srcs = [i.get_attribute("src") for i in all_imgs[:10]]
-            log.info(f"  [{doc_number}] STOP at {stage}: no img[src*='/files/documents/'] found after 6 tries. "
-                     f"Page has {len(all_imgs)} <img> total, first few srcs: {srcs}")
+            time.sleep(1.5)
+        if not summary_ready:
+            log.info(f"  [{doc_number}] STOP at {stage}: SUMMARY panel never rendered "
+                     f"(no 'Property Address'/'Parties' h3 after 8 tries)")
             return "", "", stage
-        stage = "image_found"
-        img_url = img.get_attribute("src")
-        if not img_url:
-            log.info(f"  [{doc_number}] STOP at {stage}: img element found but src attribute empty")
-            return "", "", stage
+        stage = "summary_rendered"
 
-        import tempfile
+        address, owner = "", ""
         try:
-            req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
-            with urllib.request.urlopen(req, timeout=30) as r:
-                image_bytes = r.read()
+            h3_elements = driver.find_elements(By.TAG_NAME, "h3")
+            for h3 in h3_elements:
+                label = h3.text.strip()
+                if label not in ("Property Address", "Parties"):
+                    continue
+                container = h3.find_element(By.XPATH, "..")
+                value_spans = container.find_elements(By.CSS_SELECTOR, ".doc-preview-group__summary-group-label")
+                values = [v.text.strip() for v in value_spans if v.text.strip()]
+                if label == "Property Address" and values:
+                    address = values[0]
+                elif label == "Parties" and values:
+                    # "Parties" can list multiple grantor/grantee lines;
+                    # take the first non-empty one as a best-effort owner
+                    # name rather than trying to disambiguate grantor vs
+                    # grantee roles from this compact view.
+                    owner = values[0]
         except Exception as e:
-            log.info(f"  [{doc_number}] STOP at {stage}: image download failed: {type(e).__name__}: {e} "
-                     f"(url={img_url[:120]})")
-            return "", "", stage
-        stage = "image_downloaded"
-        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-            tmp.write(image_bytes)
-            tmp_path = tmp.name
+            log.info(f"  [{doc_number}] WARN: error reading SUMMARY panel fields: {type(e).__name__}: {e}")
+        stage = "summary_extracted"
 
-        import pytesseract
-        from PIL import Image
-        try:
-            text = pytesseract.image_to_string(Image.open(tmp_path))
-        except Exception as e:
-            log.info(f"  [{doc_number}] STOP at {stage}: pytesseract/PIL failed on downloaded image "
-                     f"({len(image_bytes)} bytes): {type(e).__name__}: {e}")
-            try:
-                os.unlink(tmp_path)
-            except Exception:
-                pass
-            return "", "", stage
-        stage = "ocr_ran"
-        try:
-            os.unlink(tmp_path)
-        except Exception:
-            pass
+        if address:
+            log.info(f"  [{doc_number}] address from SUMMARY panel: {address!r}")
+        if owner:
+            log.info(f"  [{doc_number}] owner from SUMMARY panel: {owner!r}")
 
-        addr_match = ADDRESS_RE.search(text) or ADDRESS_FALLBACK_RE.search(text)
-        address = addr_match.group(1).strip().rstrip(".") if addr_match else ""
-        grantor_match = GRANTOR_RE.search(text)
-        owner = grantor_match.group(1).strip().rstrip(".") if grantor_match else ""
+        if not owner:
+            # OCR fallback for owner name only -- "Parties" came back
+            # empty (confirmed a real, common case, not a bug), and the
+            # scanned notice text itself (Grantor(s) line) is the only
+            # remaining source for it. Address is NOT re-attempted via
+            # OCR since the SUMMARY panel is the authoritative source for
+            # it; if that came back blank the image likely won't do
+            # better and isn't worth the extra minute-plus per doc.
+            img = None
+            for _ in range(4):
+                imgs = driver.find_elements(By.CSS_SELECTOR, "img[src*='/files/documents/']")
+                if imgs:
+                    img = imgs[0]
+                    break
+                time.sleep(2)
+            if img and img.get_attribute("src"):
+                stage = "image_found"
+                img_url = img.get_attribute("src")
+                import tempfile
+                try:
+                    req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
+                    with urllib.request.urlopen(req, timeout=30) as r:
+                        image_bytes = r.read()
+                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+                        tmp.write(image_bytes)
+                        tmp_path = tmp.name
+                    import pytesseract
+                    from PIL import Image
+                    text = pytesseract.image_to_string(Image.open(tmp_path))
+                    try:
+                        os.unlink(tmp_path)
+                    except Exception:
+                        pass
+                    grantor_match = GRANTOR_RE.search(text)
+                    if grantor_match:
+                        owner = grantor_match.group(1).strip().rstrip(".")
+                        log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
+                except Exception as e:
+                    log.info(f"  [{doc_number}] OCR owner-fallback failed (non-fatal): {type(e).__name__}: {e}")
+            else:
+                log.info(f"  [{doc_number}] no OCR fallback image available for owner either")
+
         if not address and not owner:
-            snippet = re.sub(r"\s+", " ", text).strip()[:300]
-            log.info(f"  [{doc_number}] STOP at {stage}: OCR produced {len(text)} chars but neither regex "
-                     f"matched. Text snippet: {snippet!r}")
+            log.info(f"  [{doc_number}] STOP at {stage}: neither Property Address nor Parties nor OCR "
+                     f"fallback yielded anything")
         stage = "done"
         return address, owner, stage
     except Exception as e:
