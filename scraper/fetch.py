@@ -61,7 +61,7 @@ SEARCH_END   = (TODAY_CT + timedelta(days=220)).strftime("%Y%m%d")
 
 PAGE_TIMEOUT = 120
 MAX_PAGES    = 60          # 60*50 = 3000 rows -- comfortably above the current ~2,501 total
-OCR_LIMIT    = 30          # per-run cap on new docs OCR'd -- backlog carries over via known_docs.
+OCR_LIMIT    = 5           # TEMP diagnostic run 2026-09-18, restore to 30 after root cause confirmed
                             # Each OCR fetch reloads a full results page to reach a clickable row
                             # (see ocr_doc below), so this is deliberately conservative -- 2026-09-17
                             # test run's rapid page loads got a real "request timed out" from the
@@ -276,6 +276,16 @@ def ocr_doc(driver, offset, doc_number):
     from selenium.webdriver.common.by import By
     from selenium.webdriver.support.ui import WebDriverWait
 
+    # 2026-09-18: every failure branch below used log.debug(), but the
+    # module logger is configured at INFO -- every one of these diagnostic
+    # lines has been silently swallowed since this function was written.
+    # Confirmed live: two prior "fix" attempts both shipped with 0% OCR
+    # success and zero visibility into which stage was actually failing.
+    # Bumped to log.info() so a real run finally shows where the pipeline
+    # breaks, and a per-stage counter is returned so main() can print an
+    # aggregate breakdown across the whole batch instead of just a final
+    # 0/N.
+    stage = "start"
     try:
         driver.set_page_load_timeout(PAGE_TIMEOUT)
         driver.get(f"{SEARCH_URL}&offset={offset}")
@@ -283,6 +293,7 @@ def ocr_doc(driver, offset, doc_number):
             lambda d: d.find_elements(By.CSS_SELECTOR, "table tbody tr")
         )
         time.sleep(1.5)
+        stage = "page_loaded"
 
         target_cell = None
         for cell in driver.find_elements(By.CSS_SELECTOR, "td.col-6"):
@@ -290,9 +301,10 @@ def ocr_doc(driver, offset, doc_number):
                 target_cell = cell
                 break
         if not target_cell:
-            log.debug(f"  Could not find row for {doc_number} at offset {offset} -- site may have reordered")
-            return "", ""
+            log.info(f"  [{doc_number}] STOP at {stage}: row not found at offset {offset} (site may have reordered)")
+            return "", "", stage
         row = target_cell.find_element(By.XPATH, "..")
+        stage = "row_found"
 
         # Not certain which element actually carries the SPA's click
         # handler -- try row, then cell, then any link inside the row,
@@ -300,13 +312,16 @@ def ocr_doc(driver, offset, doc_number):
         # guess fails fast instead of burning minutes per doc across a
         # 30-doc run.
         navigated = False
-        for clickable in (row, target_cell):
+        nav_errors = []
+        for name, clickable in (("row", row), ("cell", target_cell)):
             try:
                 clickable.click()
                 WebDriverWait(driver, 15).until(lambda d: "/results" not in d.current_url)
                 navigated = True
+                stage = f"clicked_{name}"
                 break
-            except Exception:
+            except Exception as e:
+                nav_errors.append(f"{name}: {type(e).__name__}: {e}")
                 continue
         if not navigated:
             links = row.find_elements(By.TAG_NAME, "a")
@@ -315,37 +330,66 @@ def ocr_doc(driver, offset, doc_number):
                     links[0].click()
                     WebDriverWait(driver, 15).until(lambda d: "/results" not in d.current_url)
                     navigated = True
-                except Exception:
-                    pass
+                    stage = "clicked_link"
+                except Exception as e:
+                    nav_errors.append(f"link: {type(e).__name__}: {e}")
+            else:
+                nav_errors.append("no <a> tag found inside row")
         if not navigated:
-            log.debug(f"  Click didn't navigate for {doc_number}")
-            return "", ""
+            log.info(f"  [{doc_number}] STOP at {stage}: click never navigated away from /results. "
+                     f"Attempts: {' | '.join(nav_errors)}. Current URL: {driver.current_url}")
+            return "", "", stage
         time.sleep(2)
+        log.info(f"  [{doc_number}] navigated OK ({stage}) -> {driver.current_url}")
 
         img = None
-        for _ in range(6):
+        for attempt in range(6):
             imgs = driver.find_elements(By.CSS_SELECTOR, "img[src*='/files/documents/']")
             if imgs:
                 img = imgs[0]
                 break
             time.sleep(2)
         if not img:
-            return "", ""
+            # dump what images/selectors ARE on the page, once, to see what
+            # the real viewer markup looks like if our selector is stale
+            all_imgs = driver.find_elements(By.TAG_NAME, "img")
+            srcs = [i.get_attribute("src") for i in all_imgs[:10]]
+            log.info(f"  [{doc_number}] STOP at {stage}: no img[src*='/files/documents/'] found after 6 tries. "
+                     f"Page has {len(all_imgs)} <img> total, first few srcs: {srcs}")
+            return "", "", stage
+        stage = "image_found"
         img_url = img.get_attribute("src")
         if not img_url:
-            return "", ""
+            log.info(f"  [{doc_number}] STOP at {stage}: img element found but src attribute empty")
+            return "", "", stage
 
         import tempfile
-        req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            image_bytes = r.read()
+        try:
+            req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                image_bytes = r.read()
+        except Exception as e:
+            log.info(f"  [{doc_number}] STOP at {stage}: image download failed: {type(e).__name__}: {e} "
+                     f"(url={img_url[:120]})")
+            return "", "", stage
+        stage = "image_downloaded"
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
             tmp.write(image_bytes)
             tmp_path = tmp.name
 
         import pytesseract
         from PIL import Image
-        text = pytesseract.image_to_string(Image.open(tmp_path))
+        try:
+            text = pytesseract.image_to_string(Image.open(tmp_path))
+        except Exception as e:
+            log.info(f"  [{doc_number}] STOP at {stage}: pytesseract/PIL failed on downloaded image "
+                     f"({len(image_bytes)} bytes): {type(e).__name__}: {e}")
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
+            return "", "", stage
+        stage = "ocr_ran"
         try:
             os.unlink(tmp_path)
         except Exception:
@@ -355,10 +399,15 @@ def ocr_doc(driver, offset, doc_number):
         address = addr_match.group(1).strip().rstrip(".") if addr_match else ""
         grantor_match = GRANTOR_RE.search(text)
         owner = grantor_match.group(1).strip().rstrip(".") if grantor_match else ""
-        return address, owner
+        if not address and not owner:
+            snippet = re.sub(r"\s+", " ", text).strip()[:300]
+            log.info(f"  [{doc_number}] STOP at {stage}: OCR produced {len(text)} chars but neither regex "
+                     f"matched. Text snippet: {snippet!r}")
+        stage = "done"
+        return address, owner, stage
     except Exception as e:
-        log.debug(f"  OCR error for {doc_number}: {e}")
-        return "", ""
+        log.info(f"  [{doc_number}] EXCEPTION at {stage}: {type(e).__name__}: {e}")
+        return "", "", stage
 
 
 def parse_city_zip(address_or_city):
@@ -439,15 +488,18 @@ def main():
 
         new_records = []
         ocr_hits = 0
+        stage_counts = {}
         for i, row in enumerate(new_rows[:OCR_LIMIT]):
             log.info(f"[{i + 1}/{min(len(new_rows), OCR_LIMIT)}] OCR doc {row['doc_number']} (sale {row['sale_date']})")
-            address, owner = ocr_doc(driver, row["offset"], row["doc_number"])
+            address, owner, stage = ocr_doc(driver, row["offset"], row["doc_number"])
+            stage_counts[stage] = stage_counts.get(stage, 0) + 1
             if address or owner:
                 ocr_hits += 1
             rec = build_record(row, address, owner)
             new_records.append(rec)
             time.sleep(2)
         log.info(f"OCR: {ocr_hits}/{len(new_records)} docs yielded at least an address or owner")
+        log.info(f"OCR stage breakdown (where the pipeline stopped for each doc): {stage_counts}")
     finally:
         driver.quit()
 
