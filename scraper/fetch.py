@@ -272,8 +272,20 @@ def scrape_search_results(driver):
     return future_rows
 
 
-GRANTOR_RE = re.compile(
-    r"Grantor\(?s?\)?:?\s*([A-Z][A-Za-z .,&'\-]{3,80})",
+# 2026-09-18: original pattern assumed "Grantor: NAME" -- real notice text
+# (confirmed reading an actual doc) puts the name BEFORE the word grantor,
+# e.g. "with PATRICE M BOYD A SINGLE WOMAN, grantor(s) and MORTGAGE
+# ELECTRONIC..." and separately "executed by PATRICE M BOYD A SINGLE
+# WOMAN, securing the payment of...". Try both; the "executed by ...
+# securing" phrasing is the more reliable of the two (matches the same
+# phrasing Bexar's own OCR regex targets).
+GRANTOR_EXECUTED_RE = re.compile(
+    r"executed\s+by\s+([A-Z][A-Za-z0-9 .,&'\-]{3,80}?),?\s+securing",
+    re.IGNORECASE,
+)
+GRANTOR_WITH_RE = re.compile(
+    r"with\s+([A-Z][A-Za-z0-9 .,&'\-]{3,80}?),?\s+grantor\(?s?\)?",
+    re.IGNORECASE,
 )
 
 
@@ -421,16 +433,29 @@ def ocr_doc(driver, offset, doc_number):
             # OCR since the SUMMARY panel is the authoritative source for
             # it; if that came back blank the image likely won't do
             # better and isn't worth the extra minute-plus per doc.
+            # 2026-09-18: confirmed live via direct DOM inspection -- the
+            # document viewer renders the page as an SVG <image> element
+            # (href/xlink:href), NOT a plain <img src=...>. This selector
+            # could never match, at any wait length, regardless of how
+            # long the page had to load -- the "no OCR fallback image
+            # available" log line on every single prior attempt (including
+            # the one doc that got past the click/timeout issue) was this
+            # bug, not a real absence of an image. The image itself is
+            # real and the grantor name is genuinely printed in it
+            # (confirmed reading "PATRICE M BOYD A SINGLE WOMAN" directly
+            # off a real notice this way).
             img = None
             for _ in range(4):
-                imgs = driver.find_elements(By.CSS_SELECTOR, "img[src*='/files/documents/']")
+                imgs = driver.find_elements(By.CSS_SELECTOR, "svg image")
                 if imgs:
                     img = imgs[0]
                     break
                 time.sleep(2)
-            if img and img.get_attribute("src"):
+            img_url = None
+            if img:
+                img_url = img.get_attribute("href") or img.get_attribute("xlink:href")
+            if img_url:
                 stage = "image_found"
-                img_url = img.get_attribute("src")
                 import tempfile
                 try:
                     req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
@@ -446,7 +471,7 @@ def ocr_doc(driver, offset, doc_number):
                         os.unlink(tmp_path)
                     except Exception:
                         pass
-                    grantor_match = GRANTOR_RE.search(text)
+                    grantor_match = GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
                     if grantor_match:
                         owner = grantor_match.group(1).strip().rstrip(".")
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
