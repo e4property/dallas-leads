@@ -41,6 +41,9 @@ jobs:
 
       - name: Run scraper
         id: scrape
+        env:
+          DALLAS_CLERK_EMAIL: "${{ secrets.DALLAS_CLERK_EMAIL }}"
+          DALLAS_CLERK_PASSWORD: "${{ secrets.DALLAS_CLERK_PASSWORD }}"
         run: python scraper/fetch.py
 
       - name: Purge past-auction leads

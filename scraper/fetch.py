@@ -124,6 +124,97 @@ def get_driver():
     return driver
 
 
+def login_publicsearch(driver):
+    """
+    Ported from bexar-leads's fetch.py 2026-09-18, in response to a real
+    HTTP 401 on the signed document-image URL (confirmed live: address
+    extraction from the SUMMARY panel works anonymously, but downloading
+    the actual page image does not). Bexar's own scraper has always
+    logged in for this exact reason and has never hit Dallas's other
+    open mystery either -- every doc after the first one in a run timing
+    out at the page-load step, regardless of added delay. Anonymous
+    Tyler PublicSearch sessions plausibly get rate-limited/blocked far
+    more aggressively than authenticated ones; this single fix may
+    resolve both problems at once, but needs its own DALLAS_CLERK_EMAIL/
+    DALLAS_CLERK_PASSWORD secret -- a Tyler PublicSearch login is scoped
+    to one county subdomain, so Bexar's existing CLERK_EMAIL/PASSWORD
+    account will not carry over here. No login attempted at all if those
+    aren't set (was true of this scraper's entire history until now).
+    """
+    from selenium.webdriver.common.by import By
+
+    email    = os.environ.get("DALLAS_CLERK_EMAIL", "")
+    password = os.environ.get("DALLAS_CLERK_PASSWORD", "")
+    if not email or not password:
+        log.warning("No DALLAS_CLERK_EMAIL/DALLAS_CLERK_PASSWORD — skipping login, "
+                     "running anonymous (address-only, no OCR image access)")
+        return False
+    try:
+        driver.set_page_load_timeout(20)
+        driver.get(f"{PUBLICSEARCH_BASE}/signin")
+        time.sleep(4)
+        log.info(f"Login page title: {driver.title} | url: {driver.current_url}")
+
+        email_el = None
+        for sel in ["input[type='email']", "input[name='email']",
+                    "input[name='username']", "input[placeholder*='mail']",
+                    "input[placeholder*='ser']"]:
+            try:
+                els = driver.find_elements(By.CSS_SELECTOR, sel)
+                if els:
+                    email_el = els[0]
+                    break
+            except Exception:
+                pass
+        if not email_el:
+            log.warning("Login: email field not found")
+            return False
+        email_el.clear()
+        email_el.send_keys(email)
+
+        pass_el = None
+        for sel in ["input[type='password']", "input[name='password']"]:
+            try:
+                els = driver.find_elements(By.CSS_SELECTOR, sel)
+                if els:
+                    pass_el = els[0]
+                    break
+            except Exception:
+                pass
+        if not pass_el:
+            log.warning("Login: password field not found")
+            return False
+        pass_el.clear()
+        pass_el.send_keys(password)
+
+        submitted = False
+        for sel in ["button[type='submit']", "input[type='submit']", "button"]:
+            try:
+                btns = driver.find_elements(By.CSS_SELECTOR, sel)
+                for btn in btns:
+                    txt = (btn.text or "").lower()
+                    if any(x in txt for x in ["sign in", "login", "log in", "submit", ""]):
+                        btn.click()
+                        submitted = True
+                        break
+            except Exception:
+                pass
+            if submitted:
+                break
+        if not submitted:
+            pass_el.submit()
+
+        time.sleep(4)
+        if "login" not in driver.current_url.lower() and "signin" not in driver.current_url.lower():
+            log.info("PublicSearch login OK")
+            return True
+        log.warning(f"Login: still on signin page after submit (url={driver.current_url})")
+        return False
+    except Exception as e:
+        log.warning(f"PublicSearch login error: {type(e).__name__}: {e}")
+        return False
+
+
 def parse_mdy(s):
     if not s:
         return None
@@ -563,6 +654,7 @@ def main():
 
     driver = get_driver()
     try:
+        login_publicsearch(driver)
         future_rows = scrape_search_results(driver)
         log.info(f"Found {len(future_rows)} total future-dated FORECLOSURE notices in window")
 
