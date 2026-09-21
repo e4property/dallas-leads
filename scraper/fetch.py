@@ -400,6 +400,16 @@ GRANTOR_WITH_RE = re.compile(
 GRANTOR_EXECUTED_PERIOD_RE = re.compile(
     r"executed\s+by\s+([A-Z][A-Za-z0-9 .,&'\-]{3,80}?)\.\s",
 )
+# 2026-09-21: a second, entirely different template -- confirmed live on doc
+# 202600002544 -- uses a label/value table ("Trustor(s): MERRITT CROSSINGS
+# LLC, A TEXAS LIMITED LIABILITY COMPANY AND ADHAAF AMER DARDAR   Original
+# Beneficiary: ...") instead of prose. Dallas notices are filed by multiple
+# different trustee/posting companies with their own templates -- these four
+# patterns cover the ones seen so far, not necessarily every one that exists.
+GRANTOR_TRUSTOR_RE = re.compile(
+    r"Trustor\(?s?\)?:?\s*([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s+Original",
+    re.IGNORECASE,
+)
 
 
 def ocr_doc(driver, offset, doc_number):
@@ -603,10 +613,20 @@ def ocr_doc(driver, offset, doc_number):
                     except Exception:
                         pass
                     grantor_match = (GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
-                                      or GRANTOR_EXECUTED_PERIOD_RE.search(text))
+                                      or GRANTOR_EXECUTED_PERIOD_RE.search(text)
+                                      or GRANTOR_TRUSTOR_RE.search(text))
                     if grantor_match:
                         owner = grantor_match.group(1).strip().rstrip(".")
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
+                    else:
+                        # 2026-09-21: this used to be silent -- no log line at
+                        # all -- which is exactly how the grantor regexes
+                        # matching 0/79 owners for two runs straight went
+                        # undiagnosed until read manually in-browser. Print
+                        # enough of the OCR'd text to spot a new template's
+                        # actual wording next time without re-doing that.
+                        log.info(f"  [{doc_number}] OCR'd image but no grantor pattern matched. "
+                                 f"First 300 chars: {text[:300]!r}")
                 except Exception as e:
                     log.info(f"  [{doc_number}] OCR owner-fallback failed (non-fatal): {type(e).__name__}: {e}")
                 finally:
