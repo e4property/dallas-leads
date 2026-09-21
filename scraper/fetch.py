@@ -236,19 +236,27 @@ def parse_mdy(s):
 
 def load_known_docs():
     """Returns (known_good_docs, prev_records). known_good_docs is doc
-    numbers that already have a real address or owner -- genuinely done,
-    skip forever. Records with neither (every doc from this scraper's whole
-    two-prior-attempt 0%-OCR history) are deliberately left OUT of that
-    set: confirmed live 2026-09-18 that treating "already has a row in
-    records.json" as "done" meant a fresh run found 0 new docs and never
-    retried a single one of the 79 already sitting there with blank OCR
-    data. Those get re-fetched (using the current run's fresh offset,
+    numbers that already have BOTH a real address and owner -- genuinely
+    done, skip forever. Records missing either (every doc from this
+    scraper's whole two-prior-attempt 0%-OCR history) are deliberately left
+    OUT of that set: confirmed live 2026-09-18 that treating "already has a
+    row in records.json" as "done" meant a fresh run found 0 new docs and
+    never retried a single one of the 79 already sitting there with blank
+    OCR data. Those get re-fetched (using the current run's fresh offset,
     since offset isn't persisted) and, if this run's OCR succeeds, replace
-    the old blank record instead of duplicating it."""
+    the old blank record instead of duplicating it.
+
+    2026-09-21: this used to be "address OR owner" -- address (SUMMARY
+    panel) and owner (separate OCR-image fallback, added later) are
+    independently sourced, so a doc that got an address before the owner
+    regexes existed was marked "done" forever with owner permanently
+    blank. Confirmed live: 0/79 owners after two full runs with working
+    grantor patterns, because every doc that had picked up an address in
+    an earlier run was never retried for the owner it was still missing."""
     if RECORDS_PATH.exists():
         try:
             prev = json.loads(RECORDS_PATH.read_text(encoding="utf-8"))
-            known_good = {r["doc_number"] for r in prev if r.get("doc_number") and (r.get("address") or r.get("owner"))}
+            known_good = {r["doc_number"] for r in prev if r.get("doc_number") and r.get("address") and r.get("owner")}
             return known_good, prev
         except Exception as e:
             log.warning(f"Could not load existing records.json: {e}")
