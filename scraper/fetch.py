@@ -388,6 +388,18 @@ GRANTOR_WITH_RE = re.compile(
     r"with\s+([A-Z][A-Za-z0-9 .,&'\-]{3,80}?),?\s+grantor\(?s?\)?",
     re.IGNORECASE,
 )
+# 2026-09-21: confirmed live on doc 202600002552 -- this county's actual
+# "Notice of Trustee's Foreclosure Sale" template reads "...granted by the
+# Deed of Trust executed by VINCENT DAVIS JR, A SINGLE MAN." with a period
+# ending the sentence right after the name, then a new numbered paragraph
+# ("6. Obligations Secured...") -- no "securing" and no "grantor(s)" appear
+# anywhere near the name, so neither existing pattern matched on ANY of the
+# 4 non-empty-Parties docs in that day's run (0/79 owners populated despite
+# the address-OCR pipeline itself working). Match up to the terminating
+# period instead.
+GRANTOR_EXECUTED_PERIOD_RE = re.compile(
+    r"executed\s+by\s+([A-Z][A-Za-z0-9 .,&'\-]{3,80}?)\.\s",
+)
 
 
 def ocr_doc(driver, offset, doc_number):
@@ -590,7 +602,8 @@ def ocr_doc(driver, offset, doc_number):
                         os.unlink(tmp_path)
                     except Exception:
                         pass
-                    grantor_match = GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
+                    grantor_match = (GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
+                                      or GRANTOR_EXECUTED_PERIOD_RE.search(text))
                     if grantor_match:
                         owner = grantor_match.group(1).strip().rstrip(".")
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
@@ -707,6 +720,15 @@ def main():
         log.info(f"Found {len(future_rows)} total future-dated FORECLOSURE notices in window")
 
         new_rows = [r for r in future_rows if r["doc_number"] not in known_good_docs]
+        # 2026-09-21: OCR_LIMIT is a hard rate-limit ceiling, not a runtime
+        # cap (raising it risks the runner's IP getting blocked -- see
+        # OCR_LIMIT's own comment), so with the backlog regularly exceeding
+        # it the only lever is which docs get the 6 slots each run. These
+        # were being sliced in whatever order scrape_search_results()
+        # returned them, with no regard for which sale was soonest. Sort by
+        # sale_date first so the docs closest to auction reliably get their
+        # owner/address filled in before the backlog does.
+        new_rows.sort(key=lambda r: parse_mdy(r.get("sale_date", "")) or datetime.max)
         log.info(f"{len(new_rows)} are new-or-retry (not already OCR'd successfully)")
 
         new_records = []
