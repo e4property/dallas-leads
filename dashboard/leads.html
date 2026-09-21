@@ -1816,7 +1816,7 @@ const DEFAULT_COUNTIES=[{id:'bexar',name:'Bexar County',label:'BEXAR·LEADS',url
 // 2026-08-19 as "I chose Nueces and Bexar showed up, and vice versa."
 function getCounties(){try{const s=localStorage.getItem(SK+'_counties');if(s)return JSON.parse(s);}catch(e){}return DEFAULT_COUNTIES;}
 function saveCounties(c){localStorage.setItem(SK+'_counties',JSON.stringify(c));}
-function getActiveCounty(){try{const id=localStorage.getItem(SK+'_active_county');const counties=getCounties();return counties.find(c=>c.id===id)||counties[0];}catch(e){}return getCounties()[0];}
+function getActiveCounty(){try{const id=localStorage.getItem(SK+'_active_county');const counties=getCounties();return counties.find(c=>c.id===id)||counties.find(c=>c.url===REC_URL_DEFAULT)||counties[0];}catch(e){}return getCounties()[0];}
 function setActiveCounty(id){localStorage.setItem(SK+'_active_county',id);const county=getCounties().find(c=>c.id===id);if(!county)return;S.recordsUrl=county.url;saveState();closeCountySwitcher();allLeads=[];filteredLeads=[];selectedDoc=null;selectedIdx=-1;document.getElementById('lead-list').innerHTML='<div class="loading">Loading<span class="ld">.</span><span class="ld">.</span><span class="ld">.</span></div>';fetchLeads();toast('Switched to '+county.name,'ok');}
 function toggleCountySwitcher(){const dd=document.getElementById('county-dropdown');if(!dd)return;if(dd.style.display==='none'){renderCountyList();dd.style.display='block';setTimeout(()=>document.addEventListener('click',closeOnOutside),10);}else closeCountySwitcher();}
 function closeCountySwitcher(){const dd=document.getElementById('county-dropdown');if(dd)dd.style.display='none';document.removeEventListener('click',closeOnOutside);}
