@@ -57,10 +57,20 @@ RUN_TIMESTAMP = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 # 2/24/2026 is the county's own stated migration date onto this platform
 # (dallascounty.org/.../foreclosures.php) -- nothing real exists before it
-# here. End of window is padded 220 days out so a run never has to guess
-# how far in advance notices might eventually get posted.
+# here.
+#
+# 2026-09-21: switched instrumentDateRange -> recordedDateRange. The three
+# sibling scrapers (nueces/bexar/wilson-leads) already found and fixed this
+# exact bug on 2026-08-28 -- instrumentDateRange "started returning
+# inconsistent/incomplete results" for a department-scoped FC search on this
+# same PublicSearch platform -- but the fix was never ported here. Live
+# symptom matched exactly: "Found 0 total future-dated FORECLOSURE notices"
+# despite the site visibly having current listings, right after the
+# DALLAS_CLERK_EMAIL/PASSWORD login fix was confirmed working (login was not
+# the cause). recordedDateRange's end must not extend into the future (recorded
+# dates are never forward-dated, unlike sale dates), so no more +220d padding.
 SEARCH_START = "20260201"
-SEARCH_END   = (TODAY_CT + timedelta(days=220)).strftime("%Y%m%d")
+SEARCH_END   = TODAY_CT.strftime("%Y%m%d")
 
 PAGE_TIMEOUT = 120
 MAX_PAGES    = 60          # 60*50 = 3000 rows -- comfortably above the current ~2,501 total
@@ -80,7 +90,7 @@ OCR_LIMIT    = 6           # 2026-09-18: confirmed live the site rate-limits/blo
 SEARCH_URL = (
     f"{PUBLICSEARCH_BASE}/results"
     f"?department=FC"
-    f"&instrumentDateRange={SEARCH_START}%2C{SEARCH_END}"
+    f"&recordedDateRange={SEARCH_START}%2C{SEARCH_END}"
     f"&keywordSearch=false"
     f"&limit=50"
     f"&sort=desc"
