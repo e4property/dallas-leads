@@ -559,7 +559,25 @@ def ocr_doc(driver, offset, doc_number):
                 stage = "image_found"
                 import tempfile
                 try:
-                    req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
+                    # 2026-09-21: this urllib request is a separate HTTP
+                    # client from Selenium's browser session -- it shares
+                    # NO cookies with it by default, so even a successful
+                    # driver-side login never touched this 401. Log in via
+                    # the driver ONLY right here (never during search/
+                    # listing navigation -- see main()'s note on why),
+                    # then hand its session cookies to urllib explicitly.
+                    # Doc-detail pages themselves load fine anonymously
+                    # (confirmed above -- SUMMARY panel already read before
+                    # reaching here), so this is the one place auth is
+                    # actually required.
+                    login_publicsearch(driver)
+                    cookie_header = "; ".join(
+                        f"{c['name']}={c['value']}" for c in driver.get_cookies()
+                    )
+                    req = urllib.request.Request(
+                        img_url,
+                        headers={"User-Agent": "Mozilla/5.0", "Cookie": cookie_header},
+                    )
                     with urllib.request.urlopen(req, timeout=30) as r:
                         image_bytes = r.read()
                     with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
@@ -578,6 +596,17 @@ def ocr_doc(driver, offset, doc_number):
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
                 except Exception as e:
                     log.info(f"  [{doc_number}] OCR owner-fallback failed (non-fatal): {type(e).__name__}: {e}")
+                finally:
+                    # Sign back out immediately -- the NEXT doc's ocr_doc()
+                    # call starts by reloading the search listing, which
+                    # breaks (see main()'s note) if the driver is still
+                    # authenticated. A plain GET is enough; no form/submit
+                    # needed to sign out.
+                    try:
+                        driver.get(f"{PUBLICSEARCH_BASE}/signout")
+                        time.sleep(1)
+                    except Exception:
+                        pass
             else:
                 log.info(f"  [{doc_number}] no OCR fallback image available for owner either")
 
@@ -664,7 +693,16 @@ def main():
 
     driver = get_driver()
     try:
-        login_publicsearch(driver)
+        # 2026-09-21: login must NOT be active during any listing/search
+        # page load. Live-confirmed by directly reproducing in a browser:
+        # the exact same department=FC/recordedDateRange search URL returns
+        # 2,578 real results logged OUT, and "No Results Found" for the
+        # identical URL logged IN. Some quirk on Dallas's own PublicSearch
+        # instance where an authenticated session breaks this particular
+        # search. ocr_doc() below reloads this same search URL per-doc (to
+        # find and click the row), so login can't just happen once upfront
+        # either -- it has to be scoped tightly around only the per-doc
+        # image fetch, inside ocr_doc() itself. See that function for why.
         future_rows = scrape_search_results(driver)
         log.info(f"Found {len(future_rows)} total future-dated FORECLOSURE notices in window")
 
