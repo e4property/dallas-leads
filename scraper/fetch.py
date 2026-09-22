@@ -654,9 +654,11 @@ def ocr_doc(driver, offset, doc_number):
                             re.IGNORECASE,
                         )
                         hit_lines = [ln.strip() for ln in text.splitlines() if kw_re.search(ln)]
-                        log.info(f"  [{doc_number}] OCR'd image but no grantor pattern matched. "
-                                 f"Keyword lines: {hit_lines if hit_lines else '(none found -- '
-                                 f'first 300 chars: ' + repr(text[:300]) + ')'}")
+                        if hit_lines:
+                            diag = f"keyword lines: {hit_lines}"
+                        else:
+                            diag = f"(no keyword lines -- first 300 chars: {text[:300]!r})"
+                        log.info(f"  [{doc_number}] OCR'd image but no grantor pattern matched. {diag}")
                 except Exception as e:
                     log.info(f"  [{doc_number}] OCR owner-fallback failed (non-fatal): {type(e).__name__}: {e}")
                 finally:
