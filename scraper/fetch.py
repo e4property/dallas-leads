@@ -428,13 +428,13 @@ GRANTOR_WHEREAS_RE = re.compile(
     r"([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s*\(.{0,20}?Mortgagors?",
     re.IGNORECASE,
 )
-# 2026-09-21: a sixth template -- a bare "Grantor:" label (doc 202600002547),
-# confirmed via the keyword-line log showing that exact line with nothing
-# after the colon, meaning the name is on the following OCR'd line rather
-# than the same one. Matches across the line break either way.
-GRANTOR_LABEL_RE = re.compile(
-    r"Grantor:?\s*\n?\s*([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s*\n",
-)
+# 2026-09-21: tried a bare "Grantor:" label pattern here (doc 202600002547)
+# but it matched garbage live -- "BY POLUNSKY" (Polunsky Beitel Green PLLC
+# is the foreclosure law firm on these notices, not the owner) instead of
+# an actual name. A wrong name is worse than a blank one -- it can get used
+# to contact the wrong party. Removed rather than tightened; this doc's
+# actual "Grantor:" line/value needs to be read directly, not guessed at
+# via a generic label match.
 
 
 def ocr_doc(driver, offset, doc_number):
@@ -640,8 +640,7 @@ def ocr_doc(driver, offset, doc_number):
                     grantor_match = (GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
                                       or GRANTOR_EXECUTED_PERIOD_RE.search(text)
                                       or GRANTOR_TRUSTOR_RE.search(text)
-                                      or GRANTOR_WHEREAS_RE.search(text)
-                                      or GRANTOR_LABEL_RE.search(text))
+                                      or GRANTOR_WHEREAS_RE.search(text))
                     if grantor_match:
                         owner = grantor_match.group(1).strip().rstrip(".")
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
