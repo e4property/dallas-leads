@@ -3123,7 +3123,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-09-22T00:37:28Z",
+    "run_ts": "2026-09-22T02:26:18Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3152,7 +3152,7 @@
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
-    "owner": "",
+    "owner": "By Polunsky",
     "address": "DALLAS TEXAS",
     "mail_addr": "",
     "city": "",
@@ -3165,11 +3165,10 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-09-22T00:37:28Z",
+    "run_ts": "2026-09-22T02:26:18Z",
     "flags": [
       "OCR RETRY",
-      "HAS SALE DATE",
-      "NO OWNER - OCR MISS"
+      "HAS SALE DATE"
     ],
     "lender": "",
     "loan_amount": "",
@@ -3188,7 +3187,7 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 10
   },
   {
     "type": "NOF",
@@ -3207,7 +3206,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-09-22T00:37:28Z",
+    "run_ts": "2026-09-22T02:26:18Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3249,7 +3248,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-09-22T00:37:28Z",
+    "run_ts": "2026-09-22T02:26:18Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3291,7 +3290,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-09-22T00:37:28Z",
+    "run_ts": "2026-09-22T02:26:18Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3333,7 +3332,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-09-22T00:37:28Z",
+    "run_ts": "2026-09-22T02:26:18Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
