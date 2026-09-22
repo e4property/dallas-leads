@@ -428,6 +428,13 @@ GRANTOR_WHEREAS_RE = re.compile(
     r"([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s*\(.{0,20}?Mortgagors?",
     re.IGNORECASE,
 )
+# 2026-09-21: a sixth template -- a bare "Grantor:" label (doc 202600002547),
+# confirmed via the keyword-line log showing that exact line with nothing
+# after the colon, meaning the name is on the following OCR'd line rather
+# than the same one. Matches across the line break either way.
+GRANTOR_LABEL_RE = re.compile(
+    r"Grantor:?\s*\n?\s*([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s*\n",
+)
 
 
 def ocr_doc(driver, offset, doc_number):
@@ -633,7 +640,8 @@ def ocr_doc(driver, offset, doc_number):
                     grantor_match = (GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
                                       or GRANTOR_EXECUTED_PERIOD_RE.search(text)
                                       or GRANTOR_TRUSTOR_RE.search(text)
-                                      or GRANTOR_WHEREAS_RE.search(text))
+                                      or GRANTOR_WHEREAS_RE.search(text)
+                                      or GRANTOR_LABEL_RE.search(text))
                     if grantor_match:
                         owner = grantor_match.group(1).strip().rstrip(".")
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
