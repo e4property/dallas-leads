@@ -641,11 +641,22 @@ def ocr_doc(driver, offset, doc_number):
                         # 2026-09-21: this used to be silent -- no log line at
                         # all -- which is exactly how the grantor regexes
                         # matching 0/79 owners for two runs straight went
-                        # undiagnosed until read manually in-browser. Print
-                        # enough of the OCR'd text to spot a new template's
-                        # actual wording next time without re-doing that.
+                        # undiagnosed until read manually in-browser. The
+                        # first 300 chars alone (original version of this log
+                        # line) is almost always just the boilerplate military-
+                        # rights disclaimer every template opens with, not the
+                        # actual grantor wording -- print whichever lines
+                        # contain a likely keyword instead, so a new
+                        # template's real phrasing is visible directly from
+                        # the log without another round of manual doc-reading.
+                        kw_re = re.compile(
+                            r"trustor|mortgagor|grantor|executed by|whereas|obligor|borrower",
+                            re.IGNORECASE,
+                        )
+                        hit_lines = [ln.strip() for ln in text.splitlines() if kw_re.search(ln)]
                         log.info(f"  [{doc_number}] OCR'd image but no grantor pattern matched. "
-                                 f"First 300 chars: {text[:300]!r}")
+                                 f"Keyword lines: {hit_lines if hit_lines else '(none found -- '
+                                 f'first 300 chars: ' + repr(text[:300]) + ')'}")
                 except Exception as e:
                     log.info(f"  [{doc_number}] OCR owner-fallback failed (non-fatal): {type(e).__name__}: {e}")
                 finally:
