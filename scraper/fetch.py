@@ -418,6 +418,16 @@ GRANTOR_TRUSTOR_RE = re.compile(
     r"Trustor\(?s?\)?:?\s*([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s+Original",
     re.IGNORECASE,
 )
+# 2026-09-21: a fifth template (doc 202600002546) -- "WHEREAS, on June 11,
+# 2025, ESPBINVESTMENTS, LLC ("Mortgagors", whether one or more), executed
+# that certain deed of trust...". Confirmed via the new unmatched-OCR log
+# line rather than manual in-browser reading -- exactly what that logging
+# was added for.
+GRANTOR_WHEREAS_RE = re.compile(
+    r"WHEREAS,?\s+on\s+[A-Za-z]+\.?\s+\d{1,2},?\s+\d{4},?\s+"
+    r"([A-Z][A-Za-z0-9 .,&'\-]{3,100}?)\s*\(.{0,20}?Mortgagors?",
+    re.IGNORECASE,
+)
 
 
 def ocr_doc(driver, offset, doc_number):
@@ -622,7 +632,8 @@ def ocr_doc(driver, offset, doc_number):
                         pass
                     grantor_match = (GRANTOR_EXECUTED_RE.search(text) or GRANTOR_WITH_RE.search(text)
                                       or GRANTOR_EXECUTED_PERIOD_RE.search(text)
-                                      or GRANTOR_TRUSTOR_RE.search(text))
+                                      or GRANTOR_TRUSTOR_RE.search(text)
+                                      or GRANTOR_WHEREAS_RE.search(text))
                     if grantor_match:
                         owner = grantor_match.group(1).strip().rstrip(".")
                         log.info(f"  [{doc_number}] owner from OCR fallback: {owner!r}")
