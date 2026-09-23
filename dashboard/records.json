@@ -3111,7 +3111,7 @@
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "ROWLETT TEXAS",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3123,10 +3123,11 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 13,
-    "run_ts": "2026-09-23T18:53:14Z",
+    "run_ts": "2026-09-23T22:48:20Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3146,14 +3147,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "DALLAS TEXAS",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3165,10 +3166,11 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 13,
-    "run_ts": "2026-09-23T18:53:14Z",
+    "run_ts": "2026-09-23T22:48:20Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3188,14 +3190,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "12630 HALLUM STREET DALLAS TEXAS 75243",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3207,10 +3209,11 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 13,
-    "run_ts": "2026-09-23T18:53:14Z",
+    "run_ts": "2026-09-23T22:48:20Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3230,14 +3233,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "GARLAND TEXAS",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3249,10 +3252,11 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 13,
-    "run_ts": "2026-09-23T18:53:14Z",
+    "run_ts": "2026-09-23T22:48:20Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3272,14 +3276,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "4611 TRAVIS STREET, UNIT 1405B DALLAS TEXAS 75205",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3291,10 +3295,11 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 13,
-    "run_ts": "2026-09-23T18:53:14Z",
+    "run_ts": "2026-09-23T22:48:20Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3314,14 +3319,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "1200 MAIN STREET UNIT 1904 DALLAS TEXAS 75202",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3333,10 +3338,11 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 13,
-    "run_ts": "2026-09-23T18:53:14Z",
+    "run_ts": "2026-09-23T22:48:20Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3356,6 +3362,6 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   }
 ]
