@@ -3159,15 +3159,15 @@
     "zip": "",
     "absentee": false,
     "duplicate": false,
-    "is_new": true,
+    "is_new": false,
     "doc_number": "202600002580",
     "date_filed": "9/23/2026",
     "date_recorded": "9/23/2026",
     "sale_date": "11/02/2026",
     "days_until_sale": 39,
-    "run_ts": "2026-09-24T18:51:12Z",
+    "run_ts": "2026-09-24T22:24:37Z",
     "flags": [
-      "NEW",
+      "OCR RETRY",
       "HAS SALE DATE",
       "NO OWNER - OCR MISS"
     ],
@@ -3207,7 +3207,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T18:51:12Z",
+    "run_ts": "2026-09-24T22:24:37Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3249,7 +3249,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T18:51:12Z",
+    "run_ts": "2026-09-24T22:24:37Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3291,7 +3291,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T18:51:12Z",
+    "run_ts": "2026-09-24T22:24:37Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3333,7 +3333,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T18:51:12Z",
+    "run_ts": "2026-09-24T22:24:37Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3375,7 +3375,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T18:51:12Z",
+    "run_ts": "2026-09-24T22:24:37Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
