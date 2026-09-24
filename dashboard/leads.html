@@ -817,6 +817,9 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
             </div>
           </div>
           <div class="dsec">
+            <button class="act-btn" style="width:100%;background:var(--red-bg);border-color:var(--red-mid);color:var(--red-dk)" onclick="openDeleteModal()">🗑️ Delete Lead</button>
+          </div>
+          <div class="dsec">
             <div class="dsec-lbl">Lender & Filing</div>
             <div class="info-grid">
               <div class="info-field"><div class="info-lbl">Lender</div><div class="info-val" id="m-lender">—</div></div>
@@ -886,6 +889,19 @@ body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-
     <div class="modal-actions">
       <button class="nav-btn" onclick="closeSettings()">Cancel</button>
       <button class="nav-btn run" onclick="saveSettings()">Save</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <h3 style="color:var(--red-dk)">🗑️ Delete Lead</h3>
+    <div id="delete-modal-summary" style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5"></div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px">This permanently removes the lead from the dashboard. This cannot be undone. Type <strong>DELETE</strong> to confirm.</div>
+    <label>Type DELETE to confirm</label>
+    <input type="text" id="delete-confirm-input" placeholder="DELETE" autocomplete="off" oninput="updateDeleteConfirmState()" onkeydown="if(event.key==='Enter')confirmDeleteLead()">
+    <div class="modal-actions">
+      <button class="nav-btn" onclick="closeDeleteModal()">Cancel</button>
+      <button class="nav-btn run" id="delete-confirm-btn" style="background:var(--red);border-color:var(--red-mid)" disabled onclick="confirmDeleteLead()">Delete Lead</button>
     </div>
   </div>
 </div>
@@ -1873,6 +1889,90 @@ async function reconcileJarvis(){
 function openSettings(){const el=document.getElementById('fw-budget-display');if(el)el.textContent=`Used: ${S.used} / 100`;document.getElementById('set-apikey').value=S.ghlApiKey||'';document.getElementById('set-locid').value=S.ghlLocationId||'UAOJlgeerLu3GChP9jDJ';document.getElementById('set-url').value=S.recordsUrl||REC_URL_DEFAULT;document.getElementById('set-ghtoken').value=S.ghToken||'';const ne=document.getElementById('set-nueces-url');if(ne){const counties=getCounties();const n=counties.find(c=>c.id==='nueces');if(n)ne.value=n.url||'';}document.getElementById('settings-modal').classList.add('open');}
 function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
 function saveSettings(){S.ghlApiKey=document.getElementById('set-apikey').value.trim();S.ghlLocationId=document.getElementById('set-locid').value.trim();S.recordsUrl=document.getElementById('set-url').value.trim()||REC_URL_DEFAULT;S.ghToken=document.getElementById('set-ghtoken').value.trim();const ne=document.getElementById('set-nueces-url');if(ne&&ne.value.trim()){const counties=getCounties();const n=counties.find(c=>c.id==='nueces');if(n){n.url=ne.value.trim();saveCounties(counties);}}saveState();closeSettings();toast('Settings saved','ok');fetchLeads();}
+
+// Delete-lead failsafe: must type the literal word DELETE before the button
+// enables. Removes the record from records.json via the GitHub Contents API
+// (same fetch-sha-then-PUT pattern as writeBackToRepo, but filters the
+// record out entirely instead of merging updates) and from allLeads/S.leads
+// locally so the UI reflects it immediately without waiting on a re-fetch.
+let _deleteTargetDoc=null;
+function openDeleteModal(){
+  if(!selectedDoc)return;
+  const lead=allLeads.find(l=>l.doc_number===selectedDoc);
+  if(!lead)return;
+  _deleteTargetDoc=selectedDoc;
+  document.getElementById('delete-modal-summary').innerHTML=`<strong>${lead.owner||'—'}</strong><br>${lead.address||'—'}<br>Doc #${lead.doc_number}`;
+  document.getElementById('delete-confirm-input').value='';
+  document.getElementById('delete-confirm-btn').disabled=true;
+  document.getElementById('delete-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('delete-confirm-input').focus(),50);
+}
+function closeDeleteModal(){document.getElementById('delete-modal').classList.remove('open');_deleteTargetDoc=null;}
+function updateDeleteConfirmState(){
+  const val=document.getElementById('delete-confirm-input').value;
+  document.getElementById('delete-confirm-btn').disabled=(val!=='DELETE');
+}
+async function confirmDeleteLead(){
+  const val=document.getElementById('delete-confirm-input').value;
+  if(val!=='DELETE'||!_deleteTargetDoc)return;
+  const doc=_deleteTargetDoc;
+  const btn=document.getElementById('delete-confirm-btn');
+  btn.disabled=true;btn.textContent='Deleting…';
+  const ok=await deleteLeadFromRepo(doc);
+  if(ok){
+    allLeads=allLeads.filter(l=>l.doc_number!==doc);
+    filteredLeads=filteredLeads.filter(l=>l.doc_number!==doc);
+    if(S.leads[doc])delete S.leads[doc];
+    saveState();
+    closeDeleteModal();
+    selectedDoc=null;
+    renderList();updateStats();
+    toast('Lead deleted','ok');
+    const detail=document.getElementById('detail-panel');if(detail)detail.style.display='none';
+  }else{
+    btn.disabled=false;btn.textContent='Delete Lead';
+    toast('⚠ Delete failed — check your GitHub token in Settings and try again',true);
+  }
+}
+async function deleteLeadFromRepo(doc_number,attempt=1){
+  if(!S.ghToken){toast('⚠ No GitHub token set — add one in Settings to enable delete',true);return false;}
+  try{
+    const repoPath='dashboard/records.json';
+    const apiBase=`https://api.github.com/repos/${repoForActiveCounty()}/contents/${repoPath}`;
+    const getRes=await fetch(apiBase,{headers:{'Authorization':'Bearer '+S.ghToken,'Accept':'application/vnd.github+json'}});
+    if(!getRes.ok){
+      if(attempt<5){await new Promise(r=>setTimeout(r,Math.min(300*attempt,2500)));return deleteLeadFromRepo(doc_number,attempt+1);}
+      return false;
+    }
+    const fileData=await getRes.json();
+    const sha=fileData.sha;
+    let currentJson;
+    if(fileData.content&&fileData.encoding==='base64'){
+      currentJson=JSON.parse(atob(fileData.content.replace(/\n/g,'')));
+    }else{
+      const rawRes=await fetch(`https://raw.githubusercontent.com/${repoForActiveCounty()}/main/${repoPath}?t=${Date.now()}`);
+      if(!rawRes.ok){
+        if(attempt<5){await new Promise(r=>setTimeout(r,Math.min(300*attempt,2500)));return deleteLeadFromRepo(doc_number,attempt+1);}
+        return false;
+      }
+      currentJson=await rawRes.json();
+    }
+    const before=currentJson.length;
+    const newJson=currentJson.filter(rec=>rec.doc_number!==doc_number);
+    if(newJson.length===before)return true; // already gone, nothing to do
+    const newContent=btoa(unescape(encodeURIComponent(JSON.stringify(newJson))));
+    const putRes=await fetch(apiBase,{method:'PUT',headers:{'Authorization':'Bearer '+S.ghToken,'Accept':'application/vnd.github+json','Content-Type':'application/json'},body:JSON.stringify({message:`dash: delete lead ${doc_number}`,content:newContent,sha:sha})});
+    if(!putRes.ok){
+      if(attempt<5){await new Promise(r=>setTimeout(r,Math.min(300*attempt,2500)));return deleteLeadFromRepo(doc_number,attempt+1);}
+      return false;
+    }
+    return true;
+  }catch(e){
+    if(attempt<5){await new Promise(r=>setTimeout(r,Math.min(300*attempt,2500)));return deleteLeadFromRepo(doc_number,attempt+1);}
+    console.warn('deleteLeadFromRepo:',e);
+    return false;
+  }
+}
 init();
 </script>
 </body>
