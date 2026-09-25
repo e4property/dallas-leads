@@ -87,6 +87,14 @@ OCR_LIMIT    = 6           # 2026-09-18: confirmed live the site rate-limits/blo
                             # test run's rapid page loads got a real "request timed out" from the
                             # county's own site under load; don't hammer it harder than this.
 
+# On-market checking (ported from nueces-leads 2026-09-25) -- flags leads
+# already listed for sale/rent elsewhere via homeharvest (pip, MIT license)
+# against Realtor.com's public page data, no API key/cost.
+ON_MARKET_STATUSES      = {"FOR_SALE", "PENDING"}
+ON_MARKET_FETCH_LIMIT   = 20   # max never-checked leads to look up per run
+ON_MARKET_REFRESH_DAYS  = 7    # re-check a lead's market status at most this often
+ON_MARKET_REFRESH_LIMIT = 10   # max already-checked leads to re-check per run
+
 SEARCH_URL = (
     f"{PUBLICSEARCH_BASE}/results"
     f"?department=FC"
@@ -756,6 +764,151 @@ def build_record(row, address, owner, is_new=True):
     return rec
 
 
+# ── On-market status (ported from nueces-leads 2026-09-25) ────────────────────
+_OM_STREET_SUFFIX_WORDS = {
+    "ST", "STREET", "DR", "DRIVE", "RD", "ROAD", "AVE", "AVENUE", "LN", "LANE",
+    "CT", "COURT", "BLVD", "BOULEVARD", "WAY", "CIR", "CIRCLE", "TRL", "TRAIL",
+    "PL", "PLACE", "PKWY", "PARKWAY", "LOOP", "RUN", "PASS", "XING", "CROSSING",
+    "COVE", "BND", "BEND", "VW", "VIEW", "HOLW", "HOLLOW", "RDG", "RIDGE",
+    "MDW", "MDWS", "MEADOW", "MEADOWS", "GLN", "GLEN", "HL", "HILL", "HLS",
+    "HILLS", "PT", "POINT", "SQ", "SQUARE", "TER", "TERRACE", "WALK", "GRV",
+    "GROVE", "VLY", "VALLEY", "N", "S", "E", "W", "NE", "NW", "SE", "SW",
+}
+
+
+def _om_street_core_tokens(street):
+    street = str(street) if street is not None else ""
+    if street in ("nan", "<NA>", "None"):
+        street = ""
+    s = re.sub(r"[^A-Z0-9 ]", " ", street.upper())
+    return [t for t in s.split() if t not in _OM_STREET_SUFFIX_WORDS]
+
+
+def _om_address_matches(searched_addr, searched_zip, row_street, row_zip):
+    """Verify a HomeHarvest/Realtor.com search result actually corresponds to
+    the property searched for -- confirmed live (bexar-leads, 2026-09-22)
+    that scrape_property() silently returns its best guess even when
+    nothing real matches. Require the house number to match exactly, at
+    least one distinctive street-name word to overlap, and zip to match
+    when both sides have one."""
+    searched_tokens = _om_street_core_tokens(searched_addr)
+    row_tokens = _om_street_core_tokens(row_street)
+    if not searched_tokens or not row_tokens:
+        return False
+    searched_num = searched_tokens[0] if searched_tokens[0].isdigit() else None
+    row_num = row_tokens[0] if row_tokens[0].isdigit() else None
+    if not searched_num or searched_num != row_num:
+        return False
+    if not (set(searched_tokens[1:]) & set(row_tokens[1:])):
+        return False
+    sz = str(searched_zip) if searched_zip is not None else ""
+    rz = str(row_zip) if row_zip is not None else ""
+    sz = "" if sz in ("nan", "<NA>", "None") else sz.strip()[:5]
+    rz = "" if rz in ("nan", "<NA>", "None") else rz.strip()[:5]
+    if sz and rz and sz != rz:
+        return False
+    return True
+
+
+def _om_first_matching_row(df, searched_addr, searched_zip):
+    for _, row in df.iterrows():
+        if _om_address_matches(searched_addr, searched_zip, row.get("street"), row.get("zip_code")):
+            return row
+    return None
+
+
+def fetch_on_market_status(records):
+    """
+    Flags leads already listed for sale/rent elsewhere via homeharvest
+    (pip, MIT license) against Realtor.com's public page data -- no API
+    key, no cost. Soft dependency: any failure (network, no match, library
+    error) just leaves on_market unset for that lead rather than breaking
+    the run. Two passes: never-checked leads first (ON_MARKET_FETCH_LIMIT),
+    then a refresh of already-checked leads older than
+    ON_MARKET_REFRESH_DAYS (ON_MARKET_REFRESH_LIMIT).
+    """
+    import pandas as pd
+    from homeharvest import scrape_property
+
+    def clean(val):
+        if val is None or pd.isna(val):
+            return None
+        s = str(val).strip()
+        return None if s in ("", "nan", "<NA>", "None") else val
+
+    cutoff = datetime.now(ZoneInfo("UTC")) - timedelta(days=ON_MARKET_REFRESH_DAYS)
+
+    def is_real_address(addr):
+        # Guards against a lead whose "address" field fell back to just a
+        # city name (build_record() does this when OCR never found a real
+        # address) -- searching that as a street address would return
+        # garbage matches.
+        return bool(addr) and addr.strip()[:1].isdigit()
+
+    def needs_check(r):
+        if not is_real_address(r.get("address")):
+            return False
+        checked_at = r.get("on_market_checked_at")
+        if not checked_at:
+            return True
+        try:
+            parsed = datetime.strptime(checked_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=ZoneInfo("UTC"))
+            return parsed < cutoff
+        except Exception:
+            return True
+
+    never_checked = [r for r in records if is_real_address(r.get("address")) and not r.get("on_market_checked_at")]
+    stale_checked = [r for r in records if is_real_address(r.get("address")) and r.get("on_market_checked_at") and needs_check(r)]
+
+    candidates = never_checked[:ON_MARKET_FETCH_LIMIT] + stale_checked[:ON_MARKET_REFRESH_LIMIT]
+
+    if not candidates:
+        log.info("On-market: no eligible leads — skipping")
+        return records
+
+    log.info(f"On-market: {len(never_checked[:ON_MARKET_FETCH_LIMIT])} new + "
+             f"{len(stale_checked[:ON_MARKET_REFRESH_LIMIT])} refresh "
+             f"(caps={ON_MARKET_FETCH_LIMIT}/{ON_MARKET_REFRESH_LIMIT})")
+    changed = 0
+    errors = 0
+
+    for rec in candidates:
+        full_addr = f"{rec['address']}, {rec.get('city', '')}, TX {rec.get('zip', '')}".strip(", ")
+        try:
+            df = scrape_property(location=full_addr, listing_type=["for_sale", "pending"])
+            now_iso = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
+            was_on_market = bool(rec.get("on_market"))
+
+            if df is None or len(df) == 0:
+                rec["on_market_checked_at"] = now_iso
+                continue
+
+            row = _om_first_matching_row(df, rec["address"], rec.get("zip"))
+            if row is None:
+                log.info(f"  On-market [{rec.get('doc_number')}] {full_addr}: "
+                         f"{len(df)} result(s) returned but none verified against this address -- treating as no match")
+                rec["on_market_checked_at"] = now_iso
+                continue
+
+            status = clean(row.get("status")) or ""
+            rec["on_market"] = status in ON_MARKET_STATUSES
+            rec["on_market_status"] = status
+            rec["on_market_checked_at"] = now_iso
+
+            if rec["on_market"] != was_on_market:
+                changed += 1
+                log.info(f"  On-market [{rec.get('doc_number')}] {full_addr}: "
+                         f"{was_on_market} -> {rec['on_market']} (status={status})")
+        except Exception as e:
+            log.warning(f"  On-market [{rec.get('doc_number')}] {full_addr}: error: {e}")
+            errors += 1
+        finally:
+            time.sleep(1)
+
+    log.info(f"On-market: {changed} status changes, {errors} errors out of {len(candidates)} candidates")
+    return records
+
+
 def main():
     known_good_docs, prev_records = load_known_docs()
     all_prev_doc_numbers = {r["doc_number"] for r in prev_records if r.get("doc_number")}
@@ -827,6 +980,12 @@ def main():
         log.info(f"Dropped {dropped} existing record(s) whose sale date has passed or was re-OCR'd this run")
 
     all_records = kept_prev + new_records
+
+    try:
+        all_records = fetch_on_market_status(all_records)
+    except Exception as e:
+        log.warning(f"On-market status error: {e}")
+
     RECORDS_PATH.parent.mkdir(parents=True, exist_ok=True)
     RECORDS_PATH.write_text(json.dumps(all_records, indent=2, ensure_ascii=False), encoding="utf-8")
     log.info(f"Saved {len(all_records)} records ({len(new_records)} new)")

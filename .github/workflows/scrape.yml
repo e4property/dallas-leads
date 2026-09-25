@@ -37,7 +37,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
 
       - name: Install dependencies
-        run: pip install requests selenium pytesseract pillow
+        run: pip install requests selenium pytesseract pillow homeharvest pandas
 
       - name: Run scraper
         id: scrape
