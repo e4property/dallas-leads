@@ -873,7 +873,21 @@ def fetch_on_market_status(records):
     errors = 0
 
     for rec in candidates:
-        full_addr = f"{rec['address']}, {rec.get('city', '')}, TX {rec.get('zip', '')}".strip(", ")
+        # 2026-09-25: confirmed live on the very first real run -- Dallas's
+        # OCR pipeline puts the FULL address (street+city+state+zip) into
+        # `address` and leaves `city`/`zip` blank (build_record()'s own
+        # parse_city_zip() call fails silently whenever the source text
+        # says "TEXAS" instead of "TX", which is common). Blindly appending
+        # ", {city}, TX {zip}" on top of an address that already ends in
+        # "...RICHARDSON TEXAS 75080" produced a garbled double-tailed
+        # query ("...75080, , TX") that matched 0/3 real leads on that
+        # first run -- not because none were on-market, but because the
+        # search string itself was broken. Only append city/zip when at
+        # least one is actually populated.
+        if rec.get("city") or rec.get("zip"):
+            full_addr = f"{rec['address']}, {rec.get('city', '')}, TX {rec.get('zip', '')}".strip(", ")
+        else:
+            full_addr = rec["address"]
         try:
             df = scrape_property(location=full_addr, listing_type=["for_sale", "pending"])
             now_iso = datetime.now(ZoneInfo("UTC")).strftime("%Y-%m-%dT%H:%M:%SZ")
