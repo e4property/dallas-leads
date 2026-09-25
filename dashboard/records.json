@@ -1802,7 +1802,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-25T03:33:03Z"
   },
   {
     "type": "NOF",
@@ -1844,91 +1847,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
-  },
-  {
-    "type": "NOF",
-    "source": "dallas_publicsearch",
-    "county": "dallas",
-    "owner": "",
-    "address": "4001 HILLSDALE LANE GARLAND TEXAS 75042",
-    "mail_addr": "",
-    "city": "",
-    "zip": "",
-    "absentee": false,
-    "duplicate": false,
-    "is_new": false,
-    "doc_number": "202600002571",
-    "date_filed": "9/17/2026",
-    "date_recorded": "9/17/2026",
-    "sale_date": "11/03/2026",
-    "days_until_sale": 44,
-    "run_ts": "2026-09-20T18:01:23Z",
-    "flags": [
-      "OCR RETRY",
-      "HAS SALE DATE",
-      "NO OWNER - OCR MISS"
-    ],
-    "lender": "",
-    "loan_amount": "",
-    "loan_date": "",
-    "trustee": "",
-    "tenure_years": null,
-    "prop_id": "",
-    "deed_date": "",
-    "appraised_value": "",
-    "annual_taxes": "",
-    "land_value": "",
-    "stacked": false,
-    "ghl_pushed": false,
-    "ghl_pushed_at": "",
-    "ghl_id": "",
-    "dash_phone": "",
-    "dash_dispo": "new",
-    "dash_notes": "",
-    "score": 9
-  },
-  {
-    "type": "NOF",
-    "source": "dallas_publicsearch",
-    "county": "dallas",
-    "owner": "",
-    "address": "DALLAS TEXAS",
-    "mail_addr": "",
-    "city": "",
-    "zip": "",
-    "absentee": false,
-    "duplicate": false,
-    "is_new": false,
-    "doc_number": "202600002579",
-    "date_filed": "9/17/2026",
-    "date_recorded": "9/17/2026",
-    "sale_date": "11/03/2026",
-    "days_until_sale": 44,
-    "run_ts": "2026-09-20T22:15:29Z",
-    "flags": [
-      "OCR RETRY",
-      "HAS SALE DATE",
-      "NO OWNER - OCR MISS"
-    ],
-    "lender": "",
-    "loan_amount": "",
-    "loan_date": "",
-    "trustee": "",
-    "tenure_years": null,
-    "prop_id": "",
-    "deed_date": "",
-    "appraised_value": "",
-    "annual_taxes": "",
-    "land_value": "",
-    "stacked": false,
-    "ghl_pushed": false,
-    "ghl_pushed_at": "",
-    "ghl_id": "",
-    "dash_phone": "",
-    "dash_dispo": "new",
-    "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-25T03:33:05Z"
   },
   {
     "type": "NOF",
@@ -1970,7 +1892,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": true,
+    "on_market_status": "PENDING",
+    "on_market_checked_at": "2026-09-25T03:33:07Z"
   },
   {
     "type": "NOF",
@@ -2012,7 +1937,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-25T03:33:09Z"
   },
   {
     "type": "NOF",
@@ -2096,7 +2024,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-25T03:33:10Z"
   },
   {
     "type": "NOF",
@@ -2138,7 +2069,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:13Z"
   },
   {
     "type": "NOF",
@@ -2180,7 +2112,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:16Z"
   },
   {
     "type": "NOF",
@@ -2264,7 +2197,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:18Z"
   },
   {
     "type": "NOF",
@@ -2432,7 +2366,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-25T03:33:20Z"
   },
   {
     "type": "NOF",
@@ -2474,7 +2411,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:23Z"
   },
   {
     "type": "NOF",
@@ -2769,7 +2707,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-25T03:33:25Z"
   },
   {
     "type": "NOF",
@@ -2811,7 +2752,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:27Z"
   },
   {
     "type": "NOF",
@@ -2853,7 +2795,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:29Z"
   },
   {
     "type": "NOF",
@@ -2894,7 +2837,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 10
+    "score": 10,
+    "on_market": true,
+    "on_market_status": "FOR_SALE",
+    "on_market_checked_at": "2026-09-25T03:33:31Z"
   },
   {
     "type": "NOF",
@@ -3020,7 +2966,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "OFF_MARKET",
+    "on_market_checked_at": "2026-09-25T03:33:33Z"
   },
   {
     "type": "NOF",
@@ -3104,7 +3053,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": true,
+    "on_market_status": "PENDING",
+    "on_market_checked_at": "2026-09-25T03:33:40Z"
   },
   {
     "type": "NOF",
@@ -3146,49 +3098,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
-  },
-  {
-    "type": "NOF",
-    "source": "dallas_publicsearch",
-    "county": "dallas",
-    "owner": "",
-    "address": "DALLAS TEXAS",
-    "mail_addr": "",
-    "city": "",
-    "zip": "",
-    "absentee": false,
-    "duplicate": false,
-    "is_new": false,
-    "doc_number": "202600002580",
-    "date_filed": "9/23/2026",
-    "date_recorded": "9/23/2026",
-    "sale_date": "11/02/2026",
-    "days_until_sale": 39,
-    "run_ts": "2026-09-24T23:05:00Z",
-    "flags": [
-      "OCR RETRY",
-      "HAS SALE DATE",
-      "NO OWNER - OCR MISS"
-    ],
-    "lender": "",
-    "loan_amount": "",
-    "loan_date": "",
-    "trustee": "",
-    "tenure_years": null,
-    "prop_id": "",
-    "deed_date": "",
-    "appraised_value": "",
-    "annual_taxes": "",
-    "land_value": "",
-    "stacked": false,
-    "ghl_pushed": false,
-    "ghl_pushed_at": "",
-    "ghl_id": "",
-    "dash_phone": "",
-    "dash_dispo": "new",
-    "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:33:42Z"
   },
   {
     "type": "NOF",
@@ -3230,26 +3141,70 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:34:29Z"
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "721 REMBRANDT CIRCLE COPPELL TEXAS 75019",
+    "address": "1120 SUTTON PLAVE DESOTO TEXAS 75115",
     "mail_addr": "",
     "city": "",
     "zip": "",
     "absentee": false,
     "duplicate": false,
     "is_new": false,
-    "doc_number": "202600002568",
+    "doc_number": "202600002572",
     "date_filed": "9/17/2026",
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
     "run_ts": "2026-09-24T23:05:00Z",
+    "flags": [
+      "OCR RETRY",
+      "HAS SALE DATE",
+      "NO OWNER - OCR MISS"
+    ],
+    "lender": "",
+    "loan_amount": "",
+    "loan_date": "",
+    "trustee": "",
+    "tenure_years": null,
+    "prop_id": "",
+    "deed_date": "",
+    "appraised_value": "",
+    "annual_taxes": "",
+    "land_value": "",
+    "stacked": false,
+    "ghl_pushed": false,
+    "ghl_pushed_at": "",
+    "ghl_id": "",
+    "dash_phone": "",
+    "dash_dispo": "new",
+    "dash_notes": "",
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:34:31Z"
+  },
+  {
+    "type": "NOF",
+    "source": "dallas_publicsearch",
+    "county": "dallas",
+    "owner": "",
+    "address": "DALLAS TEXAS",
+    "mail_addr": "",
+    "city": "",
+    "zip": "",
+    "absentee": false,
+    "duplicate": false,
+    "is_new": false,
+    "doc_number": "202600002580",
+    "date_filed": "9/23/2026",
+    "date_recorded": "9/23/2026",
+    "sale_date": "11/02/2026",
+    "days_until_sale": 39,
+    "run_ts": "2026-09-25T03:29:27Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3279,6 +3234,49 @@
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
+    "address": "721 REMBRANDT CIRCLE COPPELL TEXAS 75019",
+    "mail_addr": "",
+    "city": "",
+    "zip": "",
+    "absentee": false,
+    "duplicate": false,
+    "is_new": false,
+    "doc_number": "202600002568",
+    "date_filed": "9/17/2026",
+    "date_recorded": "9/17/2026",
+    "sale_date": "11/03/2026",
+    "days_until_sale": 40,
+    "run_ts": "2026-09-25T03:29:27Z",
+    "flags": [
+      "OCR RETRY",
+      "HAS SALE DATE",
+      "NO OWNER - OCR MISS"
+    ],
+    "lender": "",
+    "loan_amount": "",
+    "loan_date": "",
+    "trustee": "",
+    "tenure_years": null,
+    "prop_id": "",
+    "deed_date": "",
+    "appraised_value": "",
+    "annual_taxes": "",
+    "land_value": "",
+    "stacked": false,
+    "ghl_pushed": false,
+    "ghl_pushed_at": "",
+    "ghl_id": "",
+    "dash_phone": "",
+    "dash_dispo": "new",
+    "dash_notes": "",
+    "score": 9,
+    "on_market_checked_at": "2026-09-25T03:34:33Z"
+  },
+  {
+    "type": "NOF",
+    "source": "dallas_publicsearch",
+    "county": "dallas",
+    "owner": "",
     "address": "813 SHERBRPPK DRIVE RICHARDSON TEXAS 75080",
     "mail_addr": "",
     "city": "",
@@ -3291,7 +3289,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T23:05:00Z",
+    "run_ts": "2026-09-25T03:29:27Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3333,7 +3331,7 @@
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T23:05:00Z",
+    "run_ts": "2026-09-25T03:29:27Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3363,19 +3361,61 @@
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "1120 SUTTON PLAVE DESOTO TEXAS 75115",
+    "address": "4001 HILLSDALE LANE GARLAND TEXAS 75042",
     "mail_addr": "",
     "city": "",
     "zip": "",
     "absentee": false,
     "duplicate": false,
     "is_new": false,
-    "doc_number": "202600002572",
+    "doc_number": "202600002571",
     "date_filed": "9/17/2026",
     "date_recorded": "9/17/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 40,
-    "run_ts": "2026-09-24T23:05:00Z",
+    "run_ts": "2026-09-25T03:29:27Z",
+    "flags": [
+      "OCR RETRY",
+      "HAS SALE DATE",
+      "NO OWNER - OCR MISS"
+    ],
+    "lender": "",
+    "loan_amount": "",
+    "loan_date": "",
+    "trustee": "",
+    "tenure_years": null,
+    "prop_id": "",
+    "deed_date": "",
+    "appraised_value": "",
+    "annual_taxes": "",
+    "land_value": "",
+    "stacked": false,
+    "ghl_pushed": false,
+    "ghl_pushed_at": "",
+    "ghl_id": "",
+    "dash_phone": "",
+    "dash_dispo": "new",
+    "dash_notes": "",
+    "score": 9
+  },
+  {
+    "type": "NOF",
+    "source": "dallas_publicsearch",
+    "county": "dallas",
+    "owner": "",
+    "address": "DALLAS TEXAS",
+    "mail_addr": "",
+    "city": "",
+    "zip": "",
+    "absentee": false,
+    "duplicate": false,
+    "is_new": false,
+    "doc_number": "202600002579",
+    "date_filed": "9/17/2026",
+    "date_recorded": "9/17/2026",
+    "sale_date": "11/03/2026",
+    "days_until_sale": 40,
+    "run_ts": "2026-09-25T03:29:27Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
