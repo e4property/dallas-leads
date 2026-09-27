@@ -3718,7 +3718,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 37,
-    "run_ts": "2026-09-27T15:30:04Z",
+    "run_ts": "2026-09-27T18:55:17Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3742,7 +3742,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T15:33:28Z"
+    "on_market_checked_at": "2026-09-27T18:59:02Z"
   },
   {
     "type": "NOF",
@@ -3761,7 +3761,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 37,
-    "run_ts": "2026-09-27T15:30:04Z",
+    "run_ts": "2026-09-27T18:55:17Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3785,14 +3785,14 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T15:33:30Z"
+    "on_market_checked_at": "2026-09-27T18:59:05Z"
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "",
+    "address": "7626-7628 DENTCREST DRIVE DALLAS TEXAS 75254",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -3804,11 +3804,10 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 37,
-    "run_ts": "2026-09-27T15:30:04Z",
+    "run_ts": "2026-09-27T18:55:17Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
-      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -3828,7 +3827,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 8
+    "score": 9,
+    "on_market_checked_at": "2026-09-27T18:59:06Z"
   },
   {
     "type": "NOF",
@@ -3847,7 +3847,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 37,
-    "run_ts": "2026-09-27T15:30:04Z",
+    "run_ts": "2026-09-27T18:55:17Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3871,7 +3871,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T15:33:33Z"
+    "on_market_checked_at": "2026-09-27T18:59:09Z"
   },
   {
     "type": "NOF",
@@ -3890,7 +3890,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 37,
-    "run_ts": "2026-09-27T15:30:04Z",
+    "run_ts": "2026-09-27T18:55:17Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3914,7 +3914,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T15:33:35Z"
+    "on_market_checked_at": "2026-09-27T18:59:13Z"
   },
   {
     "type": "NOF",
@@ -3933,7 +3933,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 37,
-    "run_ts": "2026-09-27T15:30:04Z",
+    "run_ts": "2026-09-27T18:55:17Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3957,6 +3957,6 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T15:33:37Z"
+    "on_market_checked_at": "2026-09-27T18:59:14Z"
   }
 ]
