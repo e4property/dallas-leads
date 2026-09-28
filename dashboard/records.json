@@ -3715,8 +3715,8 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 37,
-    "run_ts": "2026-09-27T22:52:42Z",
+    "days_until_sale": 36,
+    "run_ts": "2026-09-28T12:59:41Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3740,7 +3740,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T22:56:10Z"
+    "on_market_checked_at": "2026-09-28T13:03:13Z"
   },
   {
     "type": "NOF",
@@ -3758,8 +3758,8 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 37,
-    "run_ts": "2026-09-27T22:52:42Z",
+    "days_until_sale": 36,
+    "run_ts": "2026-09-28T12:59:41Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3783,7 +3783,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T22:56:13Z"
+    "on_market_checked_at": "2026-09-28T13:03:15Z"
   },
   {
     "type": "NOF",
@@ -3801,8 +3801,8 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 37,
-    "run_ts": "2026-09-27T22:52:42Z",
+    "days_until_sale": 36,
+    "run_ts": "2026-09-28T12:59:41Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3826,7 +3826,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T22:56:14Z"
+    "on_market_checked_at": "2026-09-28T13:03:17Z"
   },
   {
     "type": "NOF",
@@ -3844,8 +3844,8 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 37,
-    "run_ts": "2026-09-27T22:52:42Z",
+    "days_until_sale": 36,
+    "run_ts": "2026-09-28T12:59:41Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3871,7 +3871,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-27T22:56:15Z"
+    "on_market_checked_at": "2026-09-28T13:03:18Z"
   },
   {
     "type": "NOF",
@@ -3889,8 +3889,8 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 37,
-    "run_ts": "2026-09-27T22:52:42Z",
+    "days_until_sale": 36,
+    "run_ts": "2026-09-28T12:59:41Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3932,8 +3932,8 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 37,
-    "run_ts": "2026-09-27T22:52:42Z",
+    "days_until_sale": 36,
+    "run_ts": "2026-09-28T12:59:41Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -3957,6 +3957,6 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-27T22:56:17Z"
+    "on_market_checked_at": "2026-09-28T13:03:21Z"
   }
 ]
