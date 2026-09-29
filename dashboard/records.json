@@ -4136,7 +4136,7 @@
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "14914 GREEN VALLEY DRIVE BALCH SPRINGS TEXAS",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -4147,11 +4147,12 @@
     "date_filed": "9/28/2026",
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 36,
-    "run_ts": "2026-09-29T00:15:35Z",
+    "days_until_sale": 35,
+    "run_ts": "2026-09-29T12:34:12Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -4171,17 +4172,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9,
-    "on_market": false,
-    "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-29T00:19:01Z"
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "1636 S CORINTH STREET DALLAS TEXAS 75203",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -4192,11 +4190,12 @@
     "date_filed": "9/28/2026",
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 36,
-    "run_ts": "2026-09-29T00:15:35Z",
+    "days_until_sale": 35,
+    "run_ts": "2026-09-29T12:34:12Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -4216,15 +4215,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9,
-    "on_market_checked_at": "2026-09-29T00:19:36Z"
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "LANCASTER TEXAS",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -4235,11 +4233,12 @@
     "date_filed": "9/28/2026",
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 36,
-    "run_ts": "2026-09-29T00:15:35Z",
+    "days_until_sale": 35,
+    "run_ts": "2026-09-29T12:34:12Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -4259,14 +4258,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "2405 MAGIC VALLEY LANE CEDAR HILL TEXAS 75104",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -4277,11 +4276,12 @@
     "date_filed": "9/28/2026",
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 36,
-    "run_ts": "2026-09-29T00:15:35Z",
+    "days_until_sale": 35,
+    "run_ts": "2026-09-29T12:34:12Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -4301,17 +4301,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9,
-    "on_market": false,
-    "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-29T00:19:38Z"
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "1125 RIDGEVIEW STREET MESQUITE TEXAS 75149",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -4322,11 +4319,12 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 36,
-    "run_ts": "2026-09-29T00:15:35Z",
+    "days_until_sale": 35,
+    "run_ts": "2026-09-29T12:34:12Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -4346,15 +4344,14 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9,
-    "on_market_checked_at": "2026-09-29T00:19:41Z"
+    "score": 8
   },
   {
     "type": "NOF",
     "source": "dallas_publicsearch",
     "county": "dallas",
     "owner": "",
-    "address": "MESQUITE TEXAS",
+    "address": "",
     "mail_addr": "",
     "city": "",
     "zip": "",
@@ -4365,11 +4362,12 @@
     "date_filed": "9/24/2026",
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
-    "days_until_sale": 36,
-    "run_ts": "2026-09-29T00:15:35Z",
+    "days_until_sale": 35,
+    "run_ts": "2026-09-29T12:34:12Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
+      "NO ADDRESS - OCR MISS",
       "NO OWNER - OCR MISS"
     ],
     "lender": "",
@@ -4389,6 +4387,6 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 8
   }
 ]
