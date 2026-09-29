@@ -4148,7 +4148,7 @@
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 36,
-    "run_ts": "2026-09-28T22:30:49Z",
+    "run_ts": "2026-09-29T00:15:35Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4171,7 +4171,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-29T00:19:01Z"
   },
   {
     "type": "NOF",
@@ -4190,7 +4193,7 @@
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 36,
-    "run_ts": "2026-09-28T22:30:49Z",
+    "run_ts": "2026-09-29T00:15:35Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4213,7 +4216,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-29T00:19:36Z"
   },
   {
     "type": "NOF",
@@ -4232,7 +4236,7 @@
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 36,
-    "run_ts": "2026-09-28T22:30:49Z",
+    "run_ts": "2026-09-29T00:15:35Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4274,7 +4278,7 @@
     "date_recorded": "9/28/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 36,
-    "run_ts": "2026-09-28T22:30:49Z",
+    "run_ts": "2026-09-29T00:15:35Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4297,7 +4301,10 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market": false,
+    "on_market_status": "SOLD",
+    "on_market_checked_at": "2026-09-29T00:19:38Z"
   },
   {
     "type": "NOF",
@@ -4316,7 +4323,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 36,
-    "run_ts": "2026-09-28T22:30:49Z",
+    "run_ts": "2026-09-29T00:15:35Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4339,7 +4346,8 @@
     "dash_phone": "",
     "dash_dispo": "new",
     "dash_notes": "",
-    "score": 9
+    "score": 9,
+    "on_market_checked_at": "2026-09-29T00:19:41Z"
   },
   {
     "type": "NOF",
@@ -4358,7 +4366,7 @@
     "date_recorded": "9/24/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 36,
-    "run_ts": "2026-09-28T22:30:49Z",
+    "run_ts": "2026-09-29T00:15:35Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
