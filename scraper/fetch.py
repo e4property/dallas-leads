@@ -292,14 +292,46 @@ def scrape_search_results(driver):
         if page + 1 > MAX_PAGES:
             log.warning(f"Hit MAX_PAGES={MAX_PAGES} -- stopping, rest deferred to next run")
             break
-        url = f"{SEARCH_URL}&offset={offset}"
         log.info(f"Page {page + 1} (offset={offset})")
 
         loaded = False
-        for attempt in range(2):
+        if page == 0:
+            # Page 1 only: direct hard navigation, reliable for a session's
+            # first request.
+            url = f"{SEARCH_URL}&offset={offset}"
+            for attempt in range(2):
+                try:
+                    driver.set_page_load_timeout(PAGE_TIMEOUT)
+                    driver.get(url)
+                    WebDriverWait(driver, PAGE_TIMEOUT).until(
+                        lambda d: (
+                            d.find_elements(By.CSS_SELECTOR, "table tbody tr")
+                            or d.find_elements(By.XPATH, "//h1[contains(text(),'No Results')]")
+                        )
+                    )
+                    time.sleep(1.5)
+                    loaded = True
+                    break
+                except Exception:
+                    log.info(f"  Timeout attempt {attempt + 1} -- {'retrying' if attempt == 0 else 'stopping'}")
+                    if attempt == 0:
+                        time.sleep(5)
+        else:
+            # 2026-10-01: a second-or-later hard navigation (driver.get) in
+            # the same session gets served a genuine (not transient) "No
+            # Results Found" decoy page on this PublicSearch platform --
+            # found and fixed on bexar-leads/tarrant-leads/nueces-leads
+            # tonight, confirmed live on THIS tenant specifically before
+            # relying on it here too (a fresh tab landing straight on
+            # offset=100 works fine; the SAME tab doing offset=0 then
+            # offset=100 as two hard navigations does not -- it's the
+            # second+ hard nav in a session that's the problem, not the
+            # offset value itself). Clicking the actual pagination button
+            # on the already-loaded page works every time instead.
             try:
-                driver.set_page_load_timeout(PAGE_TIMEOUT)
-                driver.get(url)
+                next_btn = driver.find_element(By.CSS_SELECTOR, "button[aria-label='next page']")
+                driver.execute_script("arguments[0].scrollIntoView({block:'center'});", next_btn)
+                next_btn.click()
                 WebDriverWait(driver, PAGE_TIMEOUT).until(
                     lambda d: (
                         d.find_elements(By.CSS_SELECTOR, "table tbody tr")
@@ -308,11 +340,8 @@ def scrape_search_results(driver):
                 )
                 time.sleep(1.5)
                 loaded = True
-                break
-            except Exception:
-                log.info(f"  Timeout attempt {attempt + 1} -- {'retrying' if attempt == 0 else 'stopping'}")
-                if attempt == 0:
-                    time.sleep(5)
+            except Exception as e:
+                log.info(f"  Next-page click failed/absent: {e} -- treating as end of results")
         if not loaded:
             log.info("  Timeout -- stopping")
             break
