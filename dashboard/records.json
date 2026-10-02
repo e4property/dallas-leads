@@ -2710,7 +2710,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T03:33:25Z"
+    "on_market_checked_at": "2026-10-02T20:03:58Z"
   },
   {
     "type": "NOF",
@@ -2753,7 +2753,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:27Z"
+    "on_market_checked_at": "2026-10-02T20:04:00Z"
   },
   {
     "type": "NOF",
@@ -2796,7 +2796,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:29Z"
+    "on_market_checked_at": "2026-10-02T20:04:01Z"
   },
   {
     "type": "NOF",
@@ -2840,7 +2840,7 @@
     "score": 10,
     "on_market": true,
     "on_market_status": "FOR_SALE",
-    "on_market_checked_at": "2026-09-25T03:33:31Z"
+    "on_market_checked_at": "2026-10-02T20:04:03Z"
   },
   {
     "type": "NOF",
@@ -2885,7 +2885,7 @@
     "score": 9,
     "on_market": true,
     "on_market_status": "PENDING",
-    "on_market_checked_at": "2026-09-25T03:33:40Z"
+    "on_market_checked_at": "2026-10-02T20:04:11Z"
   },
   {
     "type": "NOF",
@@ -2928,7 +2928,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:42Z"
+    "on_market_checked_at": "2026-10-02T20:04:13Z"
   },
   {
     "type": "NOF",
@@ -2971,7 +2971,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:34:31Z"
+    "on_market_checked_at": "2026-10-02T20:04:15Z"
   },
   {
     "type": "NOF",
@@ -3014,7 +3014,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:34:33Z"
+    "on_market_checked_at": "2026-10-02T20:04:17Z"
   },
   {
     "type": "NOF",
@@ -3057,7 +3057,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T14:51:45Z"
+    "on_market_checked_at": "2026-10-02T20:05:05Z"
   },
   {
     "type": "NOF",
@@ -3102,7 +3102,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T14:51:47Z"
+    "on_market_checked_at": "2026-10-02T20:05:07Z"
   },
   {
     "type": "NOF",
@@ -4235,7 +4235,7 @@
     "date_recorded": "8/13/2026",
     "sale_date": "10/05/2026",
     "days_until_sale": 3,
-    "run_ts": "2026-10-02T14:00:59Z",
+    "run_ts": "2026-10-02T19:47:05Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4278,7 +4278,7 @@
     "date_recorded": "7/30/2026",
     "sale_date": "10/05/2026",
     "days_until_sale": 3,
-    "run_ts": "2026-10-02T14:00:59Z",
+    "run_ts": "2026-10-02T19:47:05Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4321,7 +4321,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 4,
-    "run_ts": "2026-10-02T14:00:59Z",
+    "run_ts": "2026-10-02T19:47:05Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4364,7 +4364,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 4,
-    "run_ts": "2026-10-02T14:00:59Z",
+    "run_ts": "2026-10-02T19:47:05Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4407,7 +4407,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 4,
-    "run_ts": "2026-10-02T14:00:59Z",
+    "run_ts": "2026-10-02T19:47:05Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4450,7 +4450,7 @@
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
     "days_until_sale": 4,
-    "run_ts": "2026-10-02T14:00:59Z",
+    "run_ts": "2026-10-02T19:47:05Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
