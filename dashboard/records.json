@@ -1805,7 +1805,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T03:33:03Z"
+    "on_market_checked_at": "2026-10-02T14:17:54Z"
   },
   {
     "type": "NOF",
@@ -1850,7 +1850,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T03:33:05Z"
+    "on_market_checked_at": "2026-10-02T14:17:55Z"
   },
   {
     "type": "NOF",
@@ -1895,7 +1895,7 @@
     "score": 9,
     "on_market": true,
     "on_market_status": "PENDING",
-    "on_market_checked_at": "2026-09-25T03:33:07Z"
+    "on_market_checked_at": "2026-10-02T14:17:57Z"
   },
   {
     "type": "NOF",
@@ -1940,7 +1940,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T03:33:09Z"
+    "on_market_checked_at": "2026-10-02T14:17:59Z"
   },
   {
     "type": "NOF",
@@ -2027,7 +2027,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T03:33:10Z"
+    "on_market_checked_at": "2026-10-02T14:18:01Z"
   },
   {
     "type": "NOF",
@@ -2070,7 +2070,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:13Z"
+    "on_market_checked_at": "2026-10-02T14:18:04Z"
   },
   {
     "type": "NOF",
@@ -2113,7 +2113,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:16Z"
+    "on_market_checked_at": "2026-10-02T14:18:07Z"
   },
   {
     "type": "NOF",
@@ -2198,7 +2198,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:18Z"
+    "on_market_checked_at": "2026-10-02T14:18:08Z"
   },
   {
     "type": "NOF",
@@ -2369,7 +2369,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-09-25T03:33:20Z"
+    "on_market_checked_at": "2026-10-02T14:18:10Z"
   },
   {
     "type": "NOF",
@@ -2412,7 +2412,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-09-25T03:33:23Z"
+    "on_market_checked_at": "2026-10-02T14:18:12Z"
   },
   {
     "type": "NOF",
@@ -4234,8 +4234,8 @@
     "date_filed": "8/13/2026",
     "date_recorded": "8/13/2026",
     "sale_date": "10/05/2026",
-    "days_until_sale": 4,
-    "run_ts": "2026-10-01T23:45:23Z",
+    "days_until_sale": 3,
+    "run_ts": "2026-10-02T14:00:59Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4277,8 +4277,8 @@
     "date_filed": "7/30/2026",
     "date_recorded": "7/30/2026",
     "sale_date": "10/05/2026",
-    "days_until_sale": 4,
-    "run_ts": "2026-10-01T23:45:23Z",
+    "days_until_sale": 3,
+    "run_ts": "2026-10-02T14:00:59Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4320,8 +4320,8 @@
     "date_filed": "9/15/2026",
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
-    "days_until_sale": 5,
-    "run_ts": "2026-10-01T23:45:23Z",
+    "days_until_sale": 4,
+    "run_ts": "2026-10-02T14:00:59Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4363,8 +4363,8 @@
     "date_filed": "9/15/2026",
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
-    "days_until_sale": 5,
-    "run_ts": "2026-10-01T23:45:23Z",
+    "days_until_sale": 4,
+    "run_ts": "2026-10-02T14:00:59Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4406,8 +4406,8 @@
     "date_filed": "9/15/2026",
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
-    "days_until_sale": 5,
-    "run_ts": "2026-10-01T23:45:23Z",
+    "days_until_sale": 4,
+    "run_ts": "2026-10-02T14:00:59Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4449,8 +4449,8 @@
     "date_filed": "9/15/2026",
     "date_recorded": "9/15/2026",
     "sale_date": "10/06/2026",
-    "days_until_sale": 5,
-    "run_ts": "2026-10-01T23:45:23Z",
+    "days_until_sale": 4,
+    "run_ts": "2026-10-02T14:00:59Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
