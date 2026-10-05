@@ -1656,6 +1656,7 @@ function copyMailAddress(){const lead=allLeads.find(l=>l.doc_number===selectedDo
 function openGHL(){const ls=LS(selectedDoc);window.open(ls.ghlId?`https://app.justjarvis.com/v2/location/${S.ghlLocationId}/contacts/detail/${ls.ghlId}`:'https://app.justjarvis.com','_blank');}
 
 function fmtAuctionLong(sd){const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((sd||'').trim());if(!m)return '';const mo=['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m[1])-1];return mo?`${mo} ${parseInt(m[2])}, ${m[3]}`:'';}
+function fmtAuctionISO(sd){const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((sd||'').trim());if(!m)return '';return `${m[3]}-${m[1].padStart(2,'0')}-${m[2].padStart(2,'0')}`;}
 async function pushGHL(lead,phone){
   try{
     // v4.2: read from editable inputs if user has changed name
@@ -1766,6 +1767,8 @@ async function pushGHL(lead,phone){
   // {{contact.auction_date}} and answer "when is the auction?" (custom field key: auction_date, e.g. "November 3, 2026").
   const cfs=[];const auctionStr=fmtAuctionLong(lead.sale_date);
   if(auctionStr)cfs.push({key:'auction_date',field_value:auctionStr});
+  // Date-type twin (YYYY-MM-DD) so Jarvis workflows can 'wait until N days before' the auction.
+  const auctionIso=fmtAuctionISO(lead.sale_date);if(auctionIso)cfs.push({key:'auction_date_calendar',field_value:auctionIso});
   if(offerLow!=null)cfs.push({key:'offer_low',field_value:String(offerLow)},{key:'offer_high',field_value:String(offerHigh)});
   if(cfs.length)body.customFields=cfs;
   const res=await fetch('https://services.leadconnectorhq.com/contacts/',{method:'POST',headers:{'Authorization':'Bearer '+S.ghlApiKey,'Content-Type':'application/json','Version':'2021-07-28'},body:JSON.stringify(body)});
