@@ -1655,6 +1655,7 @@ function copyAddress(){const lead=allLeads.find(l=>l.doc_number===selectedDoc);i
 function copyMailAddress(){const lead=allLeads.find(l=>l.doc_number===selectedDoc);if(!lead||!lead.mail_addr)return;navigator.clipboard.writeText(lead.mail_addr);toast('Mailing address copied');}
 function openGHL(){const ls=LS(selectedDoc);window.open(ls.ghlId?`https://app.justjarvis.com/v2/location/${S.ghlLocationId}/contacts/detail/${ls.ghlId}`:'https://app.justjarvis.com','_blank');}
 
+function fmtAuctionLong(sd){const m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec((sd||'').trim());if(!m)return '';const mo=['January','February','March','April','May','June','July','August','September','October','November','December'][parseInt(m[1])-1];return mo?`${mo} ${parseInt(m[2])}, ${m[3]}`:'';}
 async function pushGHL(lead,phone){
   try{
     // v4.2: read from editable inputs if user has changed name
@@ -1761,7 +1762,12 @@ async function pushGHL(lead,phone){
     if(target>0&&bottom>0){offerLow=bottom;offerHigh=top;tags.push('bot_offer_enabled');}
   }
   const body={firstName:first||'',lastName:last||addrTitle||'',phone,address1:addrTitle,city:cityTitle,state:'TX',postalCode:zipVal,tags,locationId:S.ghlLocationId,source:getActiveCounty().id+'-leads'};
-  if(offerLow!=null)body.customFields=[{key:'offer_low',field_value:String(offerLow)},{key:'offer_high',field_value:String(offerHigh)}];
+  // 2026-10-05: send the foreclosure auction date into Jarvis with every pushed lead so texts / the bot can use
+  // {{contact.auction_date}} and answer "when is the auction?" (custom field key: auction_date, e.g. "November 3, 2026").
+  const cfs=[];const auctionStr=fmtAuctionLong(lead.sale_date);
+  if(auctionStr)cfs.push({key:'auction_date',field_value:auctionStr});
+  if(offerLow!=null)cfs.push({key:'offer_low',field_value:String(offerLow)},{key:'offer_high',field_value:String(offerHigh)});
+  if(cfs.length)body.customFields=cfs;
   const res=await fetch('https://services.leadconnectorhq.com/contacts/',{method:'POST',headers:{'Authorization':'Bearer '+S.ghlApiKey,'Content-Type':'application/json','Version':'2021-07-28'},body:JSON.stringify(body)});
   const data=await res.json(),id=data.contact?.id||data.id;
   if(id){
