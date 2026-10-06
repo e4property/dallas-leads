@@ -1766,7 +1766,7 @@ async function pushGHL(lead,phone){
   // 2026-10-05: send the foreclosure auction date into Jarvis with every pushed lead so texts / the bot can use
   // {{contact.auction_date}} and answer "when is the auction?" (custom field key: auction_date, e.g. "November 3, 2026").
   const cfs=[];const auctionStr=fmtAuctionLong(lead.sale_date);
-  if(auctionStr)cfs.push({key:'auction_date',field_value:auctionStr});
+  cfs.push({key:'auction_date',field_value:auctionStr||'coming up'});
   // Date-type twin (YYYY-MM-DD) so Jarvis workflows can 'wait until N days before' the auction.
   const auctionIso=fmtAuctionISO(lead.sale_date);if(auctionIso)cfs.push({key:'auction_date_calendar',field_value:auctionIso});
   if(offerLow!=null)cfs.push({key:'offer_low',field_value:String(offerLow)},{key:'offer_high',field_value:String(offerHigh)});
