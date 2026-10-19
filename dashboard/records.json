@@ -1890,7 +1890,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-10-12T17:28:58Z"
+    "on_market_checked_at": "2026-10-19T20:41:10Z"
   },
   {
     "type": "NOF",
@@ -1933,7 +1933,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-10-12T17:29:01Z"
+    "on_market_checked_at": "2026-10-19T20:41:13Z"
   },
   {
     "type": "NOF",
@@ -1976,7 +1976,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-10-12T17:29:02Z"
+    "on_market_checked_at": "2026-10-19T20:41:14Z"
   },
   {
     "type": "NOF",
@@ -2021,7 +2021,7 @@
     "score": 9,
     "on_market": false,
     "on_market_status": "SOLD",
-    "on_market_checked_at": "2026-10-12T17:29:04Z"
+    "on_market_checked_at": "2026-10-19T20:41:16Z"
   },
   {
     "type": "NOF",
@@ -2107,7 +2107,7 @@
     "dash_dispo": "new",
     "dash_notes": "",
     "score": 9,
-    "on_market_checked_at": "2026-10-12T17:29:06Z"
+    "on_market_checked_at": "2026-10-19T20:41:19Z"
   },
   {
     "type": "NOF",
@@ -4536,7 +4536,7 @@
     "date_recorded": "9/23/2026",
     "sale_date": "11/02/2026",
     "days_until_sale": 14,
-    "run_ts": "2026-10-19T13:39:53Z",
+    "run_ts": "2026-10-19T20:24:00Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4579,7 +4579,7 @@
     "date_recorded": "10/14/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-10-19T13:39:53Z",
+    "run_ts": "2026-10-19T20:24:00Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4622,7 +4622,7 @@
     "date_recorded": "10/14/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-10-19T13:39:53Z",
+    "run_ts": "2026-10-19T20:24:00Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4665,7 +4665,7 @@
     "date_recorded": "10/13/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-10-19T13:39:53Z",
+    "run_ts": "2026-10-19T20:24:00Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4708,7 +4708,7 @@
     "date_recorded": "10/13/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-10-19T13:39:53Z",
+    "run_ts": "2026-10-19T20:24:00Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
@@ -4751,7 +4751,7 @@
     "date_recorded": "10/13/2026",
     "sale_date": "11/03/2026",
     "days_until_sale": 15,
-    "run_ts": "2026-10-19T13:39:53Z",
+    "run_ts": "2026-10-19T20:24:00Z",
     "flags": [
       "OCR RETRY",
       "HAS SALE DATE",
