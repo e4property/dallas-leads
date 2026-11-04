@@ -60,7 +60,7 @@ jobs:
             git push origin main && echo "Push succeeded" && break
             sleep $((RANDOM % 10 + 2))
             git fetch origin main
-            git rebase -X ours origin/main || git rebase --abort
+            git rebase -X theirs origin/main || git rebase --abort
             echo "Attempt $i failed, retrying..."
           done
 
