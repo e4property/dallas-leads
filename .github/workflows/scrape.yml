@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pages: write
+  deployments: read
   id-token: write
 
 concurrency:
@@ -68,4 +69,33 @@ jobs:
         with:
           path: dashboard/
 
-      - uses: actions/deploy-pages@v4
+      - name: Clear stuck Pages deployments
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for sha in $(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/deployments?environment=github-pages&per_page=5" | grep -o '"sha": *"[0-9a-f]\{40\}"' | grep -o '[0-9a-f]\{40\}' | sort -u); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/pages/deployments/$sha/cancel")
+            echo "cancel $sha -> $code"
+          done
+          sleep 5
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        id: pages_try1
+        continue-on-error: true
+      - name: Clear stuck Pages deployments (retry)
+        if: steps.pages_try1.outcome == 'failure'
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for sha in $(curl -s -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/deployments?environment=github-pages&per_page=5" | grep -o '"sha": *"[0-9a-f]\{40\}"' | grep -o '[0-9a-f]\{40\}' | sort -u); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${{ github.repository }}/pages/deployments/$sha/cancel")
+            echo "cancel $sha -> $code"
+          done
+          sleep 5
+      - name: Deploy to GitHub Pages (retry)
+        if: steps.pages_try1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
