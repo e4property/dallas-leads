@@ -35,7 +35,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install Tesseract OCR
-        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr
+        run: |
+          for i in 1 2 3 4 5; do
+            sudo apt-get -o Acquire::Retries=3 -o Acquire::ForceIPv4=true install -y tesseract-ocr && exit 0
+            sudo apt-get -o Acquire::Retries=3 -o Acquire::ForceIPv4=true update || true
+            sudo apt-get -o Acquire::Retries=3 -o Acquire::ForceIPv4=true install -y tesseract-ocr && exit 0
+            echo "apt attempt $i failed, waiting 45s"; sleep 45
+          done
+          exit 1
 
       - name: Install dependencies
         run: pip install requests selenium pytesseract pillow homeharvest pandas
