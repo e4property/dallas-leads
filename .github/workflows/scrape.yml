@@ -36,13 +36,10 @@ jobs:
 
       - name: Install Tesseract OCR
         run: |
-          for i in 1 2 3 4 5; do
-            sudo apt-get -o Acquire::Retries=3 -o Acquire::ForceIPv4=true install -y tesseract-ocr && exit 0
-            sudo apt-get -o Acquire::Retries=3 -o Acquire::ForceIPv4=true update || true
-            sudo apt-get -o Acquire::Retries=3 -o Acquire::ForceIPv4=true install -y tesseract-ocr && exit 0
-            echo "apt attempt $i failed, waiting 45s"; sleep 45
-          done
-          exit 1
+          if timeout 120 sudo apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=10 install -y tesseract-ocr; then exit 0; fi
+          echo "apt unreachable, installing bundled packages"
+          sudo dpkg -i vendor-debs/*.deb
+          tesseract --version | head -1
 
       - name: Install dependencies
         run: pip install requests selenium pytesseract pillow homeharvest pandas
