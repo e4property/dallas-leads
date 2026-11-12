@@ -996,6 +996,7 @@ async function fetchLeads(){
     const res=await fetch((S.recordsUrl||REC_URL_DEFAULT)+'?t='+Date.now());
     if(!res.ok)throw new Error('HTTP '+res.status);
     allLeads=await res.json();
+    await overlayPrivate();
     for(const rec of allLeads){const doc=rec.doc_number;if(!doc)continue;const has=rec.dash_phone||rec.dash_dispo||rec.ghl_pushed;if(has){if(!S.leads[doc])S.leads[doc]={};if(rec.dash_phone&&!S.leads[doc].phone)S.leads[doc].phone=rec.dash_phone;if(rec.dash_dispo&&!S.leads[doc].dispo)S.leads[doc].dispo=rec.dash_dispo;if(rec.dash_notes&&!S.leads[doc].notes)S.leads[doc].notes=rec.dash_notes;if(rec.ghl_pushed)S.leads[doc].ghl_pushed=true;if(rec.ghl_id&&!S.leads[doc].ghlId)S.leads[doc].ghlId=rec.ghl_id;if(rec.dash_searched_at&&!S.leads[doc].searchedAt)S.leads[doc].searchedAt=new Date(rec.dash_searched_at).getTime();}}
     saveState();
     const ts=allLeads.find(l=>l.run_ts)?.run_ts;
@@ -1359,8 +1360,55 @@ let _writeBackQueue=Promise.resolve();
 // are unaffected, but callers that need to know whether the save actually
 // landed (saveLeadInfo) can now await the real result instead of always
 // showing a success toast regardless of whether the write went through.
+/* 2026-11-11 PRIVACY: phone numbers, notes and lookup dates are saved ONLY to the private repo
+   (e4property/e4-leads-private, enrichment/<county-repo>.json). The public records.json gets just
+   a dash_has_phone true/false marker. If the private save fails, nothing is written publicly. */
+const PRIV_REPO='e4property/e4-leads-private';
+const PRIV_FIELDS=['dash_phone','dash_notes','dash_searched_at'];
+function privPath(){return 'enrichment/'+repoForActiveCounty().split('/')[1]+'.json';}
+async function _writePrivateImpl(doc_number,priv,attempt=1){
+  if(!S.ghToken)return false;
+  try{
+    const url=`https://api.github.com/repos/${PRIV_REPO}/contents/${privPath()}`;
+    const hdr={'Authorization':'Bearer '+S.ghToken,'Accept':'application/vnd.github+json'};
+    const g=await fetch(url,{headers:hdr});
+    let obj={},sha=null;
+    if(g.status===404){obj={};}
+    else if(g.ok){const fd=await g.json();sha=fd.sha;obj=JSON.parse(decodeURIComponent(escape(atob((fd.content||'e30=').replace(/\n/g,'')))))||{};}
+    else throw new Error('HTTP '+g.status);
+    obj[doc_number]=Object.assign(obj[doc_number]||{},priv);
+    const body={message:`private: update lead ${doc_number}`,content:btoa(unescape(encodeURIComponent(JSON.stringify(obj)))) };
+    if(sha)body.sha=sha;
+    const p=await fetch(url,{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},hdr),body:JSON.stringify(body)});
+    if(!p.ok)throw new Error('HTTP '+p.status);
+    return true;
+  }catch(e){
+    if(attempt<6){await new Promise(r=>setTimeout(r,Math.min(400*attempt,2500)));return _writePrivateImpl(doc_number,priv,attempt+1);}
+    console.warn('private write failed:',e);
+    toast('⚠ Phone/notes could not be saved to your private store ('+(e.message||e)+'). Kept on THIS device only, nothing published.',true);
+    return false;
+  }
+}
+async function overlayPrivate(){
+  if(!S.ghToken)return;
+  try{
+    const r=await fetch(`https://api.github.com/repos/${PRIV_REPO}/contents/${privPath()}`,{headers:{'Authorization':'Bearer '+S.ghToken,'Accept':'application/vnd.github.raw+json'}});
+    if(r.status===404)return;
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const m=await r.json();
+    for(const rec of allLeads){const e=m[rec.doc_number];if(e){for(const k of PRIV_FIELDS){if(e[k]!==undefined&&e[k]!==null)rec[k]=e[k];}}}
+  }catch(e){console.warn('private overlay failed:',e);}
+}
 function writeBackToRepo(doc_number,updates){
-  _writeBackQueue=_writeBackQueue.then(()=>_writeBackToRepoImpl(doc_number,updates)).catch(e=>{console.warn('writeBackToRepo (queued):',e);return false;});
+  const pub={},priv={};
+  for(const k in updates){if(PRIV_FIELDS.includes(k))priv[k]=updates[k];else pub[k]=updates[k];}
+  if('dash_phone' in updates)pub.dash_has_phone=!!updates.dash_phone;
+  _writeBackQueue=_writeBackQueue.then(async()=>{
+    let ok=true;
+    if(Object.keys(priv).length)ok=(await _writePrivateImpl(doc_number,priv))&&ok;
+    if(Object.keys(pub).length)ok=(await _writeBackToRepoImpl(doc_number,pub))&&ok;
+    return ok;
+  }).catch(e=>{console.warn('writeBackToRepo (queued):',e);return false;});
   return _writeBackQueue;
 }
 async function _writeBackToRepoImpl(doc_number,updates,attempt=1){

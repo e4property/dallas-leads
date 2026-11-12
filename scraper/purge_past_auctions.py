@@ -59,6 +59,7 @@ def days_old(rec):
 def has_ghl_activity(rec):
     return bool(
         rec.get("dash_phone") or
+        rec.get("dash_has_phone") or
         rec.get("ghl_id") or
         rec.get("ghl_pushed") or
         rec.get("dash_dispo") not in (None, "", "new") or
